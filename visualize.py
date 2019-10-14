@@ -4,7 +4,10 @@ import matplotlib.pyplot as plt
 def rasterplot(time, spikes, **kwargs):
     ax = plt.gca()
 
-    n_neuron, n_spike = spikes.shape
+    n_spike, n_neuron = spikes.shape
+
+    kwargs.setdefault("linestyle", "None")
+    kwargs.setdefault("marker", "|")
 
     spiketimes = []
 
@@ -25,6 +28,7 @@ def rasterplot(time, spikes, **kwargs):
                 ax.plot(
                     spiketimes[i][indexes[i]],
                     i + 1,
+                    'k',
                     **kwargs
                 )
 
