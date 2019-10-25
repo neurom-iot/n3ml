@@ -36,8 +36,7 @@ def binary_Sequence_Conversion(dataType, nBins):
     else:
         raise Exception('data type should be 0 for training or 1 for testing data')
 
-    # for i in range(0, len(dataset['x'])):
-    for i in range(0, 11):
+    for i in range(0, len(dataset['x'])):
         indImage = np.array(dataset['x'][i])
         flatten_Image = indImage.flatten()
         for pixel in flatten_Image:
