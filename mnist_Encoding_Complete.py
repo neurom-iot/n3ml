@@ -22,8 +22,8 @@ def binary_Sequence_Conversion(dataType, nBins):
     a list of Binary Sequence of Images dataset
     """
     
-	#Specify the location that contains the training.pickle and testing.pickle file
-	MNIST_path = '\\'
+    #Specify the location that contains the training.pickle and testing.pickle file
+    MNIST_path = '\\'
     bs_Dataset = []     # Binary Sequence of all Images in Dataset
     bs_Image = []       # Binary Sequence of each Image
 
