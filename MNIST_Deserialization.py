@@ -5,6 +5,7 @@ import pickle
 
 
 # specify the location of the MNIST data
+# The MNIST dataset can be downloaded from http://yann.lecun.com/exdb/mnist/
 MNIST_path = '\\'
 
 def mnist_Deserialization(picklename, dataType):
