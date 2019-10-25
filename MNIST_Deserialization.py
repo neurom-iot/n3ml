@@ -27,7 +27,7 @@ def mnist_Deserialization(picklename, dataType):
         images = open(MNIST_path + 't10k-images.idx3-ubyte', 'rb')
         labels = open(MNIST_path + 't10k-labels.idx1-ubyte', 'rb')
 
-        # Get metadata for images
+    # Get metadata for images
     images.read(4)
     n_images = unpack('>I', images.read(4))[0]  # n_images is the total number of images
     rows = unpack('>I', images.read(4))[0]
@@ -41,7 +41,7 @@ def mnist_Deserialization(picklename, dataType):
     if n_images != n_labels:
         raise Exception('number of labels did not match the number of images')
 
-        # Get the data
+    # Get the data
     x = np.zeros((n_images, rows, cols), dtype=np.uint8)  # Initialize array of Images
     y = np.zeros((n_images, 1), dtype=np.uint8)  # Initialize array of Labels
     for i in range(n_images):
