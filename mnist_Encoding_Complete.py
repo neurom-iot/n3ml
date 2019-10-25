@@ -1,4 +1,4 @@
-from PhDSpikingNet.Implementation.Dataset.MNIST import MNIST_Deserialization
+import MNIST_Deserialization  
 import numpy as np
 
 # ------------------------------------------------------------------------------
@@ -15,13 +15,15 @@ def binary_Sequence_Conversion(dataType, nBins):
 
     Params
     -----------
-    dataType: 0 for trainng data, 1 for testing data and 2 for whole dataset
+    dataType: 0 for trainng data and 1 for testing data
     nBins : time of stimulation
 
     :return:
     a list of Binary Sequence of Images dataset
     """
-    MNIST_path = 'C:/HUYNH/Python_Workplace/PT/PhDSpikingNet/Implementation/Dataset/MNIST/'
+    
+	#Specify the location that contains the training.pickle and testing.pickle file
+	MNIST_path = '\\'
     bs_Dataset = []     # Binary Sequence of all Images in Dataset
     bs_Image = []       # Binary Sequence of each Image
 
@@ -34,7 +36,8 @@ def binary_Sequence_Conversion(dataType, nBins):
     else:
         raise Exception('data type should be 0 for training or 1 for testing data')
 
-    for i in range(0, len(dataset['x'])):
+    # for i in range(0, len(dataset['x'])):
+    for i in range(0, 11):
         indImage = np.array(dataset['x'][i])
         flatten_Image = indImage.flatten()
         for pixel in flatten_Image:
