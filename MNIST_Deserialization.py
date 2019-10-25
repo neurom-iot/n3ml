@@ -5,20 +5,14 @@ import pickle
 
 
 # specify the location of the MNIST data
-MNIST_path = 'C:/HUYNH/Python_Workplace/PT/PhDSpikingNet/Implementation/Dataset/MNIST/'
-"""
-    The pickle module is used for implementing binary protocols for serializing and de-serializing 
-    a Python object structure. 
-        - dumps() – This function is called to serialize an object hierarchy.
-        - loads() – This function is called to de-serialize a data stream.
-"""
-
+MNIST_path = '\\'
 
 def mnist_Deserialization(picklename, dataType):
     """This function is used to Read image and label data
        This return a list of tuples.
        The "pickle" module is used for implementing binary protocols for serializing and de-serializing
        a Python object structure.
+    
     :param
         data Type: 1 for Training data and 0 for Testing data
         picklename: MNIST data path
