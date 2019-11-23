@@ -113,35 +113,29 @@ window.onload = function() {
             return boxes;
         };
 
-        Paper.prototype.animate_spike = function() {
-            var path = this.path('M 230 545 L 380 545').attr({
-                fill: 'none',
-                stroke: '#FF0000',
-                strokeWidth: 1,
-                opacity: 0.5
-            });
+        Paper.prototype.animate_spike = function(path) {
+            var point = path.getPointAtLength(0);
+            var sx = point.x;
+            var sy = point.y;
 
-            var spike = this.rect(50, 50, 1, 50);
+            var spike = this.rect(sx, sy, 1, 50);
+            
             var bbox = spike.getBBox();
-
-            console.log(spike);
 
             var from = 0;
             var to = path.getTotalLength();
             var duration = 1000;
             var easing = mina.linear;
-            var callback;
-            
-            callback = function() {
+            var callback = function() {
                 spike.remove();
             };
 
-            Snap.animate(from, to-10, function(val) {
+            Snap.animate(from, to, function(val) {
                 point = path.getPointAtLength(val);
-                dx = point.x - bbox.cx;
-                dy = point.y - bbox.cy;
-                spike.transform('t' + dx + ',' +dy)  ;
-            }, duration, easing, callback);
+                var dx = point.x - bbox.cx;
+                var dy = point.y - bbox.cy;
+                spike.transform('t' + dx + ',' + dy);
+            }, duration, easing, callback)
         };
     });
 
@@ -151,5 +145,16 @@ window.onload = function() {
 
     var boxes = s.make_plotbox(layers);
 
-    var spike = s.animate_spike();
+    var path = s.path('M 230 545 L 380 545').attr({
+        fill: 'none',
+        stroke: '#FF0000',
+        strokeWidth: 1,
+        opacity: 0.5
+    });
+
+    for (var i=0; i<1000; i++) {
+        setTimeout(function() {
+            s.animate_spike(path);
+        }, parseInt(3000*Math.random())+500);
+    }
 };
