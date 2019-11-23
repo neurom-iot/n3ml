@@ -4,7 +4,7 @@ function Node(n_neurons, periods) {
 }
 
 function Population(n_neurons) {
-    this.n_neurons = n_neurons
+    this.n_neurons = n_neurons;
 }
 
 function Connection(pre, post) {
@@ -14,6 +14,24 @@ function Connection(pre, post) {
 
 function Signal(name) {
     this.name = name;
+}
+
+function Simulate() {
+
+}
+
+function Builder() {
+    this.build_population = function(object) {
+        
+    };
+
+    this.build_node = function(object) {
+
+    };
+
+    this.build_connection = function(object) {
+
+    };
 }
 
 window.onload = function() {
@@ -120,9 +138,9 @@ window.onload = function() {
 
             Snap.animate(from, to-10, function(val) {
                 point = path.getPointAtLength(val);
-                new_x = point.x - bbox.cx;
-                new_y = point.y - bbox.cy;
-                spike.transform('t' + new_x + ',' + new_y)  ;
+                dx = point.x - bbox.cx;
+                dy = point.y - bbox.cy;
+                spike.transform('t' + dx + ',' +dy)  ;
             }, duration, easing, callback);
         };
     });
