@@ -145,16 +145,19 @@ window.onload = function() {
 
     var boxes = s.make_plotbox(layers);
 
-    var path = s.path('M 230 545 L 380 545').attr({
-        fill: 'none',
-        stroke: '#FF0000',
-        strokeWidth: 1,
-        opacity: 0.5
-    });
+    var spike_paths = [
+        s.path('M 230 545 L 380 545').attr({fill:'none', stroke:'#ff0000', strokeWidth: 1, opacity: 0.5}),
+        s.path('M 230 595 L 380 595').attr({fill:'none', stroke:'#ff0000', strokeWidth: 1, opacity: 0.5}),
+        s.path('M 530 545 L 680 545').attr({fill:'none', stroke:'#ff0000', strokeWidth: 1, opacity: 0.5}),
+        s.path('M 530 595 L 680 595').attr({fill:'none', stroke:'#ff0000', strokeWidth: 1, opacity: 0.5}),
+        s.path('M 530 645 L 680 645').attr({fill:'none', stroke:'#ff0000', strokeWidth: 1, opacity: 0.5}),
+        s.path('M 830 545 L 980 545').attr({fill:'none', stroke:'#ff0000', strokeWidth: 1, opacity: 0.5}),
+        s.path('M 830 595 L 980 595').attr({fill:'none', stroke:'#ff0000', strokeWidth: 1, opacity: 0.5}),
+    ];
 
     for (var i=0; i<1000; i++) {
         setTimeout(function() {
-            s.animate_spike(path);
-        }, parseInt(3000*Math.random())+500);
+            s.animate_spike(spike_paths[parseInt(Math.random()*spike_paths.length)]);
+        }, parseInt(3000*Math.random())+100*i);
     }
 };
