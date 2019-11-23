@@ -106,18 +106,19 @@ window.onload = function() {
             var spike = this.rect(50, 50, 1, 50);
             var bbox = spike.getBBox();
 
+            console.log(spike);
+
             var from = 0;
             var to = path.getTotalLength();
             var duration = 1000;
             var easing = mina.linear;
             var callback;
             
-            callback = function() {};
+            callback = function() {
+                spike.remove();
+            };
 
-            console.log(Snap);
-            console.log(this);
-
-            Snap.animate(from, to, function(val) {
+            Snap.animate(from, to-10, function(val) {
                 point = path.getPointAtLength(val);
                 new_x = point.x - bbox.cx;
                 new_y = point.y - bbox.cy;
