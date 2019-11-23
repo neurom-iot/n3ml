@@ -33,9 +33,9 @@ window.onload = function() {
             // ISSUE#001
             // Drawing nodes
             nodes = [
-                [s.circle(150, 150, 25), s.circle(150, 250, 25)],
-                [s.circle(300, 100, 25), s.circle(300, 200, 25), s.circle(300, 300, 25)],
-                [s.circle(450, 150, 25), s.circle(450, 250, 25)]
+                [this.circle(300, 200, 50), this.circle(300, 350, 50)],
+                [this.circle(600, 125, 50), this.circle(600, 275, 50), this.circle(600, 425, 50)],
+                [this.circle(900, 200, 50), this.circle(900, 350, 50)]
             ];
 
             for (var i=0; i<nodes.length; i++) {
@@ -58,9 +58,8 @@ window.onload = function() {
                         var bb1 = nodes[i][j].getBBox();
                         var bb2 = nodes[i+1][k].getBBox();
 
+                        // TODO
                         var radian = Math.atan(bb2.cy-bb1.cy/bb2.cx-bb1.cx);
-
-                        console.log(radian);
 
                         var path = 'M' + bb1.cx + ',' + bb1.cy + 'L' + bb2.cx + ',' + bb2.cy;
 
@@ -77,11 +76,31 @@ window.onload = function() {
 
             return graph;
         };
+
+        Paper.prototype.make_plotbox = function(layers) {
+            boxes = [
+                this.rect(230, 520, 150, 100),
+                this.rect(530, 520, 150, 150),
+                this.rect(830, 520, 150, 100)
+            ];
+
+            for (var i=0; i<boxes.length; i++) {
+                boxes[i].attr({
+                    fill: '#ffffff',
+                    stroke: '#000000',
+                    strokeWidth: 2
+                });
+            }
+
+            return boxes;
+        };
     });
 
-    var s = Snap(1000, 1000);
+    var s = Snap(5000, 5000);
 
     var graph = s.make_graph(layers);
+
+    var boxes = s.make_plotbox(layers);
 
     console.log(graph);
 };
