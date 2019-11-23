@@ -94,6 +94,36 @@ window.onload = function() {
 
             return boxes;
         };
+
+        Paper.prototype.animate_spike = function() {
+            var path = this.path('M 230 545 L 380 545').attr({
+                fill: 'none',
+                stroke: '#FF0000',
+                strokeWidth: 1,
+                opacity: 0.5
+            });
+
+            var spike = this.rect(50, 50, 1, 50);
+            var bbox = spike.getBBox();
+
+            var from = 0;
+            var to = path.getTotalLength();
+            var duration = 1000;
+            var easing = mina.linear;
+            var callback;
+            
+            callback = function() {};
+
+            console.log(Snap);
+            console.log(this);
+
+            Snap.animate(from, to, function(val) {
+                point = path.getPointAtLength(val);
+                new_x = point.x - bbox.cx;
+                new_y = point.y - bbox.cy;
+                spike.transform('t' + new_x + ',' + new_y)  ;
+            }, duration, easing, callback);
+        };
     });
 
     var s = Snap(5000, 5000);
@@ -102,5 +132,5 @@ window.onload = function() {
 
     var boxes = s.make_plotbox(layers);
 
-    console.log(graph);
+    var spike = s.animate_spike();
 };
