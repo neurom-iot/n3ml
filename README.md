@@ -5,6 +5,12 @@ Neuromorphic Neural Network Machine Learning (N3ML) is designed to provide the f
 - Transform spiking neural networks
 - Visualize spiking neural networks
 
+N3ML is implemented by wrapping some features in PyTorch[7]. N3ML wraps `torch.nn.Module` class to track the structure of the built neural network easily and provide the compatiability with operators in PyTorch. We can construct a spiking neural network consisting of both the operators provided in N3ML and the ones in PyTorch. We can track the architecture of a spiking neural network using the methods provided by `torch.nn.Module` class. It is helpful to transform a spiking neura network to other simulators/frameworks or neuromorphic hardwares.
+
+N3ML uses `torch.autograd.Function` to implemet surrogate derviative-based learning algorithms.
+
+N3ML wraps `torch.Tensor` to get GPU accelerations.
+
 ### Constructing spiking neural networks
 
 ### Simulating spiking neural networks
@@ -27,6 +33,16 @@ Now, n3ml is tested in Python 3.7.7.
 
 ### Install dependencies
 If you are installing from pip, some dependencies will be installed automatially that are registered in setup.py. Also, others can be found in requirements.txt.
+```
+python -r requirements.txt
+```
+You can install n3ml using pip.
+```
+pip install n3ml-python
+```
+
+## GPU acceleration
+We follows BindsNET[6] to supprot GPU acceleration in N3ML. Bascially, N3ML is implemented by wrapping torch.Tensor similar to BindsNET.
 
 ## How to Contribute?
 - Feel free to create issues/pull-requests if you have any issues.
@@ -44,3 +60,5 @@ If you are installing from pip, some dependencies will be installed automatially
 [4] Tavanaei, A. and A. Maida, BP-STDP: Approximating backpropagation using spike timing dependent plasticity, Neurocomputing, 330, 39-47 (2019)
 
 [5] Wu, Y., L. Deng, G. Li, J. Zhu, and L. Shi, Spatio-Temporal Backpropagation for Training High-Performance Spiking Neural Networks, Frontiers in neuroscience, 12, 331 (2018)
+
+[6] Hazan, H., D. J. Saunders, H. Khan, D. Patel, D. T. Sanghavi, H. T. Siegelmann, and R. Kozma, BindsNET: A Machine Learning-Oriented Spiking Neural Networks Library in Python, Frontiers in neuroinformatics, 12, 89 (2018)
