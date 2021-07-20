@@ -1,7 +1,40 @@
+from typing import Type
+
 import torch
 
 import n3ml.network
 import n3ml.connection
+import n3ml.population
+
+class Voelker:
+    def __init__(self,
+                 target: Type[n3ml.population.NEF],
+                 lr: float = 1e-4) -> None:
+        self.target = target
+        self.lr = lr
+
+    def step(self, o, label) -> None:
+        """
+            Assume the label is encoded in one-hot format
+
+            e.g.
+
+            num_classes = 5
+
+            [1, 0, 0, 0, 0]
+            [0, 0, 0, 1, 0]
+            [0, 0, 1, 0, 0]
+
+            self.target.d.size() = (output_size, neurons)
+
+            error.size() = (output_size,)
+            self.target.act.size() = (neurons,)
+
+        """
+        # print((label-o).size())
+        # print(self.target.act.size())
+        # print((self.lr * torch.ger(label - o, self.target.act)).numpy())
+        self.target.d += self.lr * torch.ger(label - o, self.target.act)
 
 
 class Ponulak:

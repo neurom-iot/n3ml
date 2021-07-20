@@ -32,26 +32,26 @@ def plot(fig, mat, w):
         plt.ion()
         fig = plt.figure(figsize=(10, 10))
         ax = fig.add_subplot(111)
-        ww = np.zeros((280, 280))
-        # ww = np.zeros((28 * 20, 28 * 20))
-        for r in range(10):
-            for c in range(10):
-                ww[r * 28:(r + 1) * 28, c * 28:(c + 1) * 28] = w[r * 10 + c].reshape(28, 28)
-        # for r in range(20):
-        #     for c in range(20):
-        #         ww[r * 28:(r + 1) * 28, c * 28:(c + 1) * 28] = w[r * 20 + c].reshape(28, 28)
+        # ww = np.zeros((280, 280))
+        ww = np.zeros((28 * 20, 28 * 20))
+        # for r in range(10):
+        #     for c in range(10):
+        #         ww[r * 28:(r + 1) * 28, c * 28:(c + 1) * 28] = w[r * 10 + c].reshape(28, 28)
+        for r in range(20):
+            for c in range(20):
+                ww[r * 28:(r + 1) * 28, c * 28:(c + 1) * 28] = w[r * 20 + c].reshape(28, 28)
         mat = ax.matshow(ww, cmap='hot_r')
         mat.set_clim(0, 1)
         fig.colorbar(mat)
         return fig, mat
-    ww = np.zeros((280, 280))
-    # ww = np.zeros((28 * 20, 28 * 20))
-    for r in range(10):
-        for c in range(10):
-            ww[r*28:(r+1)*28, c*28:(c+1)*28] = w[r*10+c].reshape(28, 28)
-    # for r in range(20):
-    #     for c in range(20):
-    #         ww[r * 28:(r + 1) * 28, c * 28:(c + 1) * 28] = w[r * 20 + c].reshape(28, 28)
+    # ww = np.zeros((280, 280))
+    ww = np.zeros((28 * 20, 28 * 20))
+    # for r in range(10):
+    #     for c in range(10):
+    #         ww[r*28:(r+1)*28, c*28:(c+1)*28] = w[r*10+c].reshape(28, 28)
+    for r in range(20):
+        for c in range(20):
+            ww[r * 28:(r + 1) * 28, c * 28:(c + 1) * 28] = w[r * 20 + c].reshape(28, 28)
     plt.gcf()
     mat.set_data(ww)
     fig.canvas.draw()

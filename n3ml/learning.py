@@ -18,7 +18,7 @@ class PostPre(LearningRule):
         self.lr = lr
 
     def run(self) -> None:
-        prev = self.connection.w.clone()
+        # prev = self.connection.w.clone()
 
         # Compute weight changes for presynaptic spikes
         s_pre = self.connection.source.s.unsqueeze(1)
@@ -40,8 +40,8 @@ class PostPre(LearningRule):
         # print("s_post:\n{}".format(s_post))
         # print("x_post:\n{}".format(x_post))
 
-        now = self.connection.w.clone()
-        print("diff of prev and now: {}".format((now - prev).sum()))
+        # now = self.connection.w.clone()
+        # print("diff of prev and now: {}".format((now - prev).sum()))
 
 
 class BaseLearning:

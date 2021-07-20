@@ -11,8 +11,28 @@ import n3ml.connection
 import n3ml.learning
 
 
+class Voelker2015(n3ml.network.Network):
+    def __init__(self,
+                 neurons: int = 100,
+                 input_size: int = 784,
+                 output_size: int = 10):
+        super().__init__()
+        self.add_component('pop', n3ml.population.NEF(neurons=neurons,
+                                                      input_size=input_size,
+                                                      output_size=output_size,
+                                                      neuron_type=n3ml.population.LIF))
+
+    def init_vars(self) -> None:
+        for p in self.population.values():
+            p.init_vars()
+
+    def init_params(self) -> None:
+        for p in self.population.values():
+            p.init_params()
+
+
 class Wu2018(n3ml.network.Network):
-    def __init__(self,  batch_size, time_interval):
+    def __init__(self, batch_size, time_interval):
         super().__init__()
         self.conv1         = nn.Conv2d(1, 32,  kernel_size=3, stride=1, padding=1)
         self.conv2         = nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1)

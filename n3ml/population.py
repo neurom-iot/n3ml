@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Type, Any, Tuple
 
 import torch
 import torch.nn as nn
@@ -98,6 +98,73 @@ class LIF(Population):
             self.x.masked_fill_(self.s.bool(), 1)
 
         return self.s
+
+
+class NEF(Population):
+    def __init__(self,
+                 neurons: int,
+                 input_size: int,
+                 output_size: int,
+                 neuron_type: Type[LIF],
+                 dt: float = 1.0,
+                 tau_rc: float = 10.0,
+                 v_th: float = 1.0,
+                 rest: float = 0.0,
+                 reset: float = 0.0,
+                 tau_ref: float = 2.0) -> None:
+        super().__init__()
+        self.neurons = neurons
+        self.input_size = input_size
+        self.output_size = output_size
+        self.neuron_type = neuron_type(neurons=neurons,
+                                       dt=dt,
+                                       tau_rc=tau_rc,
+                                       v_th=v_th,
+                                       rest=rest,
+                                       reset=reset,
+                                       tau_ref=tau_ref)
+        self.register_buffer('e', torch.zeros(size=(neurons, input_size)))
+        self.register_buffer('a', torch.zeros(size=(neurons,)))
+        self.register_buffer('bias', torch.zeros(size=(neurons,)))
+        self.register_buffer('d', torch.zeros(size=(output_size, neurons)))
+        self.register_buffer('act', torch.zeros(size=(neurons,)))
+        self.register_buffer('s', torch.zeros(size=(output_size,)))
+
+        self.init_vars()
+        self.init_params()
+
+    def init_vars(self) -> None:
+        """
+            여기서 초기화 되는 변수는 다음과 같다.
+            1. encoding weight 'e'
+            2. gain factor 'a'
+            3. bias current 'bias'
+        """
+        self.e = torch.rand_like(self.e) - 0.5
+        self.a = torch.rand_like(self.a) * 2.0
+        self.bias = torch.zeros_like(self.bias)
+        """
+            이름 수정 필요 (헷갈림)
+        """
+        self.neuron_type.init_param()
+
+    def init_params(self) -> None:
+        """
+            여기서 초기화 되는 파라미터는 다음과 같다.
+            1. decoding weight 'd'
+        """
+        self.d = torch.rand_like(self.d) - 0.5
+
+    def run(self, x: torch.Tensor) -> None:
+        j = self.a * torch.matmul(self.e, x) + self.bias
+        # print(j.view(10, 10).numpy())  # verified
+        self.act[:] = self.neuron_type.run(j)
+        # print(s.view(10, 10).numpy())  # verified
+        """
+            출력된 스파이크 s로부터 firing rate를 계산해야 한다.
+        """
+        self.s[:] = torch.matmul(self.d, self.act)
+        # print(o.numpy())  # verified
 
 
 class DiehlAndCook(Population):
