@@ -174,6 +174,7 @@ class DiehlAndCook(Population):
                  tau_rc: float = 100.0,
                  v_th: float = -52.0,
                  theta: float = 0.05,
+                 fix: bool = False,
                  rest: float = -65.0,
                  reset: float = -65.0,
                  tau_ref: float = 5.0,
@@ -185,6 +186,7 @@ class DiehlAndCook(Population):
         self.neurons = neurons
         self.traces = traces
         self.reset_theta = theta
+        self.fix = fix
         self.register_buffer('dt', torch.tensor(dt))
         self.register_buffer('v', torch.zeros(neurons))
         self.register_buffer('tau_rc', torch.tensor(tau_rc))
@@ -223,7 +225,8 @@ class DiehlAndCook(Population):
         self.v.masked_fill_(self.s.bool(), self.reset)
 
         # Update adaptive threshold
-        self.theta += self.theta_plus * self.s
+        if not self.fix:
+            self.theta += self.theta_plus * self.s
 
         # Update spike traces
         if self.traces:

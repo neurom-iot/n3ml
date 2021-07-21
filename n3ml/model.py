@@ -150,6 +150,49 @@ class DiehlAndCook2015(n3ml.network.Network):
         self.ie.w[:] = (torch.ones_like(self.ie.w) * -120.0).fill_diagonal_(0.0)
 
 
+class DiehlAndCook2015Infer(n3ml.network.Network):
+    def __init__(self, neurons: int = 100):
+        super().__init__()
+        self.neurons = neurons
+        self.add_component('inp', n3ml.population.Input(1*28*28,
+                                                        traces=True,
+                                                        tau_tr=20.0))
+        self.add_component('exc', n3ml.population.DiehlAndCook(neurons,
+                                                               traces=True,
+                                                               rest=-65.0,
+                                                               reset=-60.0,
+                                                               v_th=-52.0,
+                                                               tau_ref=5.0,
+                                                               tau_rc=100.0,
+                                                               tau_tr=20.0,
+                                                               fix=True))
+        self.add_component('inh', n3ml.population.LIF(neurons,
+                                                      traces=False,
+                                                      rest=-60.0,
+                                                      reset=-45.0,
+                                                      v_th=-40.0,
+                                                      tau_rc=10.0,
+                                                      tau_ref=2.0,
+                                                      tau_tr=20.0))
+        self.add_component('xe', n3ml.connection.LinearSynapse(self.inp,
+                                                               self.exc,
+                                                               alpha=78.4,
+                                                               initializer=torch.distributions.uniform.Uniform(0, 0.3)))
+        self.add_component('ei', n3ml.connection.LinearSynapse(self.exc,
+                                                               self.inh,
+                                                               w_min=0.0,
+                                                               w_max=22.5))
+        self.add_component('ie', n3ml.connection.LinearSynapse(self.inh,
+                                                               self.exc,
+                                                               w_min=-120.0,
+                                                               w_max=0.0))
+
+        # Initialize synaptic weight for each synapse
+        self.xe.init()
+        self.ei.w[:] = torch.diagflat(torch.ones_like(self.ei.w)[0] * 22.5)
+        self.ie.w[:] = (torch.ones_like(self.ie.w) * -120.0).fill_diagonal_(0.0)
+
+
 class Hunsberger2015(n3ml.network.Network):
     def __init__(self, amplitude, tau_ref, tau_rc, gain, sigma, num_classes=10):
         super().__init__()

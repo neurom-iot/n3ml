@@ -43,6 +43,7 @@ def plot(fig, mat, w):
         mat = ax.matshow(ww, cmap='hot_r')
         mat.set_clim(0, 1)
         fig.colorbar(mat)
+        fig.canvas.draw()
         return fig, mat
     # ww = np.zeros((280, 280))
     ww = np.zeros((28 * 20, 28 * 20))
