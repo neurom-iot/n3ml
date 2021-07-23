@@ -13,14 +13,18 @@ import n3ml.learning
 
 class Voelker2015(n3ml.network.Network):
     def __init__(self,
-                 neurons: int = 100,
-                 input_size: int = 784,
-                 output_size: int = 10):
+                 neurons: int,
+                 input_size: int,
+                 output_size: int,
+                 encoder: torch.Tensor = None,
+                 gain: torch.Tensor = None,
+                 bias: torch.Tensor = None):
         super().__init__()
         self.add_component('pop', n3ml.population.NEF(neurons=neurons,
                                                       input_size=input_size,
                                                       output_size=output_size,
                                                       neuron_type=n3ml.population.LIF))
+
 
     def init_vars(self) -> None:
         for p in self.population.values():
