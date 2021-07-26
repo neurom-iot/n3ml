@@ -76,10 +76,10 @@ if __name__ == '__main__':
 
     parser.add_argument('--data', default='data')
     parser.add_argument('--batch_size', default=1, type=int)
-    parser.add_argument('--pretrained', default='pretrained/stdp_epoch-2_step-59999.pt')
+    parser.add_argument('--pretrained', default='pretrained/stdp_epoch-2_step-60000.pt')
     parser.add_argument('--neurons', default=400, type=int)
     parser.add_argument('--time_interval', default=250, type=int)
     parser.add_argument('--num_classes', default=10, type=int)
-    parser.add_argument('--assigned', default='assigned/stdp_epoch-2_step-59999.pt')
+    parser.add_argument('--assigned', default='assigned/stdp_epoch-2_step-60000.pt')
 
     app(parser.parse_args())
