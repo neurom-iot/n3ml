@@ -1,6 +1,8 @@
 import time
 import argparse
 
+import numpy as np
+
 import torch
 import torchvision
 from torchvision.transforms import transforms
@@ -8,6 +10,8 @@ from torchvision.transforms import transforms
 from n3ml.model import DiehlAndCook2015
 from n3ml.visualizer import plot
 from n3ml.encoder import PoissonEncoder
+
+np.set_printoptions(precision=3, linewidth=np.inf)
 
 
 def app(opt):
@@ -19,7 +23,8 @@ def app(opt):
             opt.data,
             train=True,
             transform=torchvision.transforms.Compose([
-                transforms.ToTensor(), transforms.Lambda(lambda x: x * 32)])),
+                # transforms.ToTensor(), transforms.Lambda(lambda x: x * 32)])),
+                transforms.ToTensor(), transforms.Lambda(lambda x: x * 32 * 4)])),
         batch_size=opt.batch_size,
         shuffle=True)
 
@@ -27,23 +32,15 @@ def app(opt):
     encoder = PoissonEncoder(opt.time_interval)
 
     # Define a model
-    model = DiehlAndCook2015(neurons=400).cuda()
+    model = DiehlAndCook2015(neurons=opt.neurons).cuda()
 
     fig = None
     mat = None
 
-    i = 0
-
-    import numpy as np
-    np.set_printoptions(precision=3, linewidth=np.inf)
-
     # Conduct training phase
     for epoch in range(opt.num_epochs):
         start = time.time()
-        for images, labels in train_loader:
-            if i % 1000 == 0:
-                print("{}-th images are used to train".format(i + 1))
-
+        for step, (images, labels) in enumerate(train_loader):
             # Initialize a model
             model.init_param()
 
@@ -75,9 +72,18 @@ def app(opt):
             w = model.xe.w.detach().cpu().numpy()
             fig, mat = plot(fig, mat, w)
 
-            i += 1
-        end = time.time()
-        print("For one epoch, elapsed times: {}".format(end - start))
+            if (step+1) % 500 == 0:  # 500 images에 약 250 seconds
+                # check training time
+                end = time.time()
+                print("elpased time: {}".format(end-start))
+                print("{} images are used to train".format(step+1))
+
+                # save model
+                torch.save({
+                    'epoch': epoch,
+                    'step': step,
+                    'model_state_dict': model.state_dict()
+                }, 'pretrained/stdp_epoch-{}_step-{}.pt'.format(epoch, step+1))
 
 
 if __name__ == '__main__':
@@ -87,7 +93,8 @@ if __name__ == '__main__':
     parser.add_argument('--batch_size', default=1, type=int)
     parser.add_argument('--time_step', default=1, type=int)         # 1ms
     parser.add_argument('--time_interval', default=250, type=int)   # 250ms
+    parser.add_argument('--neurons', default=400, type=int)
 
-    parser.add_argument('--num_epochs', default=5, type=int)
+    parser.add_argument('--num_epochs', default=3, type=int)
 
     app(parser.parse_args())
