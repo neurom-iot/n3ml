@@ -23,22 +23,11 @@ def app(opt):
         batch_size=opt.batch_size,
         shuffle=True)
 
-    # Load fashion-MNIST dataset
-    # train_loader = torch.utils.data.DataLoader(
-    #     torchvision.datasets.FashionMNIST(
-    #         opt.data,
-    #         train=True,
-    #         download=True,
-    #         transform=torchvision.transforms.Compose([
-    #             transforms.ToTensor(), transforms.Lambda(lambda x: x * 32)])),
-    #     batch_size=opt.batch_size,
-    #     shuffle=True)
-
     # Define an encoder to generate spike train for an image
     encoder = PoissonEncoder(opt.time_interval)
 
     # Define a model
-    model = DiehlAndCook2015(neurons=100).cuda()
+    model = DiehlAndCook2015(neurons=400).cuda()
 
     fig = None
     mat = None

@@ -242,7 +242,7 @@ def app(opt):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--data', default='../data')
+    parser.add_argument('--data', default='data')
     parser.add_argument('--num_classes', default=10, type=int)
     parser.add_argument('--num_epochs', default=120, type=int)
     parser.add_argument('--batch_size', default=1, type=int)
