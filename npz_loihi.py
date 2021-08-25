@@ -22,11 +22,7 @@ def app(opt):
 
     model = SCNN()
 
-    state_dict_conv = [l for l in model.named_children() if isinstance(l[1], nn.Conv2d)]
-    state_dict_linear = [l for l in model.named_children() if isinstance(l[1], nn.Linear)]
-
-    state_dict = [l for l in reversed(state_dict_conv + [('', 0)] + state_dict_linear)]
-    state_dict = {'arr_'+str(i): (state_dict[i][1] if isinstance(state_dict[i][1], int) else state_dict[i][1].weight.detach().cpu().numpy()) for i in range(len(state_dict))}
+    state_dict = n3ml.to_state_dict_loihi(model)
 
     n3ml.save(state_dict, mode='loihi', f=opt.save)
 
