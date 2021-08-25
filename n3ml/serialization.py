@@ -1,11 +1,13 @@
-from typing import Dict
+from typing import Any
 
 import numpy as np
+
+import torch.nn as nn
 
 import n3ml.network
 
 
-def to_state_dict(dt: float, lr: float, model: n3ml.network.Network) -> Dict[str, Dict]:
+def to_state_dict_fpga(dt: float, lr: float, model: n3ml.network.Network):
     # 현재, 이 함수는 고정된 구조를 가지는 NEF 네트워크로부터 state dictionary를 추출
     # Network 구조는 고정되어 있는 것으로 봄.
     # 그 구조는 .npz 파일 형식을 따름.
@@ -33,7 +35,35 @@ def to_state_dict(dt: float, lr: float, model: n3ml.network.Network) -> Dict[str
     raise Exception("Invalid model, expected model has a n3ml.population.NEF")
 
 
-def save(obj: Dict[str, Dict], f: str) -> None:
+def to_state_dict_loihi(model: n3ml.network.Network):
+    state_dict_conv = [l for l in model.named_children() if isinstance(l[1], nn.Conv2d)]
+    state_dict_linear = [l for l in model.named_children() if isinstance(l[1], nn.Linear)]
+
+    state_dict = [l for l in reversed(state_dict_conv + [('', 0)] + state_dict_linear)]
+    state_dict = {'arr_'+str(i): (np.array(state_dict[i][1], dtype=object) if isinstance(state_dict[i][1], int) else np.array(state_dict[i][1].weight.detach().cpu().numpy(), dtype=object)) for i in range(len(state_dict))}
+
+    return state_dict
+
+
+def save(state_dict: Any, mode: str, f: str) -> None:
     if not f.endswith('.npz'):
         f = f + '.npz'
-    np.savez(f, obj)
+    if mode == 'fpga' or mode == 'loihi':
+        np.savez_compressed(f, **state_dict)
+        return
+    raise ValueError("Expected '{}' or '{}', but got '{}'".format('fpga', 'loihi', mode))
+
+
+def load(f: str, mode: str, allow_pickle: bool = True) -> Any:
+    if not f.endswith('.npz'):
+        f = f + '.npz'
+    npz = np.load(f, allow_pickle=allow_pickle)
+    if mode in ['fpga', 'loihi']:
+        state_dict = {}
+        for item in npz:
+            if mode == 'fpga':
+                state_dict[item] = npz[item].tolist()
+            elif mode == 'loihi':
+                state_dict[item] = np.array(npz[item])
+        return state_dict
+    raise ValueError("Expected '{}' or '{}', but got '{}'".format('fpga', 'loihi', mode))
