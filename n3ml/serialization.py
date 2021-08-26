@@ -42,6 +42,18 @@ def to_state_dict_loihi(model: n3ml.network.Network):
     state_dict = [l for l in reversed(state_dict_conv + [('', 0)] + state_dict_linear)]
     state_dict = {'arr_'+str(i): (np.array(state_dict[i][1], dtype=object) if isinstance(state_dict[i][1], int) else np.array(state_dict[i][1].weight.detach().cpu().numpy(), dtype=object)) for i in range(len(state_dict))}
 
+    # PyTorch and Keras have different order of shape in convolutional layer
+    for k in state_dict:
+        if len(state_dict[k].shape) > 2:
+            out_channels, in_channels, height, width = state_dict[k].shape
+            tmp = np.zeros((width, height, in_channels, out_channels))
+            for i1 in range(width):
+                for i2 in range(height):
+                    for i3 in range(in_channels):
+                        for i4 in range(out_channels):
+                            tmp[i1, i2, i3, i4] = state_dict[k][i4, i3, i2, i1]
+            state_dict[k] = tmp
+
     return state_dict
 
 

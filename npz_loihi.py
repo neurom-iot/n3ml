@@ -11,10 +11,7 @@ class SCNN(n3ml.network.Network):
         self.conv1 = nn.Conv2d(in_channels=1, out_channels=1, kernel_size=1, bias=False)
         self.conv2 = nn.Conv2d(in_channels=1, out_channels=6, kernel_size=3, stride=2, bias=False)
         self.conv3 = nn.Conv2d(in_channels=6, out_channels=24, kernel_size=3, stride=2, bias=False)
-        self.conv4 = nn.Conv2d(in_channels=24, out_channels=24, kernel_size=3, stride=1, bias=False)
-        self.conv5 = nn.Conv2d(in_channels=24, out_channels=24, kernel_size=3, stride=1, bias=False)
-        self.fc1 = nn.Linear(in_features=864, out_features=128, bias=False)
-        self.fc2 = nn.Linear(in_features=128, out_features=10, bias=False)
+        self.fc1 = nn.Linear(in_features=864, out_features=10, bias=False)
 
 
 def app(opt):
