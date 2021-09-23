@@ -26,7 +26,10 @@ def app(opt):
         batch_size=opt.batch_size,
         shuffle=False)
 
-    state_dict = torch.load(opt.pretrained)['model_state_dict']
+    if torch.cuda.is_available():
+        state_dict = torch.load(opt.pretrained)['model_state_dict']
+    else:
+        state_dict = torch.load(opt.pretrained, map_location=torch.device('cpu'))['model_state_dict']
     trained_w = state_dict['xe.w']
     trained_th = state_dict['exc.theta']
 
@@ -50,7 +53,7 @@ def app(opt):
 
         spiked_image = encoder(image)
         spiked_image = spiked_image.view(opt.time_interval, -1)
-        spiked_image = spiked_image.cuda()
+        # spiked_image = spiked_image.cuda()
 
         spike_train = []
         total_rates_for_each_class = torch.zeros(opt.num_classes)

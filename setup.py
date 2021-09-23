@@ -5,7 +5,7 @@ with open('README.md', 'r') as f:
 
 setuptools.setup(
     name='n3ml-python',
-    version='1.0.0',
+    version='1.1.0',
     author='chatterboy',
     author_email='chatter0502@gmail.com',
     description='',

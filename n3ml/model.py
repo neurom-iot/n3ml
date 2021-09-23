@@ -53,15 +53,15 @@ class Wu2018(n3ml.network.Network):
         return mem, spike
 
     def forward(self, input):
-        c1_mem = c1_spike = torch.zeros(self.batch_size, 32, 28, 28).cuda()
-        c2_mem = c2_spike = torch.zeros(self.batch_size, 32, 14, 14).cuda()
+        c1_mem = c1_spike = torch.zeros(self.batch_size, 32, 28, 28, device=input.device)
+        c2_mem = c2_spike = torch.zeros(self.batch_size, 32, 14, 14, device=input.device)
 
-        h1_mem = h1_spike               = torch.zeros(self.batch_size, 128).cuda()
-        h2_mem = h2_spike = h2_sumspike = torch.zeros(self.batch_size, 10).cuda()
+        h1_mem = h1_spike               = torch.zeros(self.batch_size, 128, device=input.device)
+        h2_mem = h2_spike = h2_sumspike = torch.zeros(self.batch_size, 10, device=input.device)
 
         for time in range(self.time_interval):
 
-            x = input > torch.rand(input.size()).cuda()
+            x = input > torch.rand(input.size(), device=input.device)
 
             c1_mem, c1_spike = self.mem_update(self.conv1, x.float(), c1_mem, c1_spike)
             x = self.avgpool(c1_spike)

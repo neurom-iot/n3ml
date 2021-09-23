@@ -45,8 +45,8 @@ def validate(val_loader, model, criterion):
     total_loss = 0
 
     for step, (images, labels) in enumerate(val_loader):
-        images = images.cuda()
-        labels = labels.cuda()
+        # images = images.cuda()
+        # labels = labels.cuda()
 
         preds = model(images)
 
@@ -70,8 +70,8 @@ def train(train_loader, model, criterion, optimizer, list_acc, list_loss, plotte
     total_loss = 0
 
     for step, (images, labels) in enumerate(train_loader):
-        images = images.cuda()
-        labels = labels.cuda()
+        # images = images.cuda()
+        # labels = labels.cuda()
 
         preds = model(images)
 
@@ -123,7 +123,7 @@ def app(opt):
         num_workers=opt.num_workers)
 
     model = Hunsberger2015(num_classes=opt.num_classes, amplitude=opt.amplitude, tau_ref=opt.tau_ref,
-                           tau_rc=opt.tau_rc, gain=opt.gain, sigma=opt.sigma).cuda()
+                           tau_rc=opt.tau_rc, gain=opt.gain, sigma=opt.sigma)
 
     criterion = nn.CrossEntropyLoss()
 

@@ -45,11 +45,11 @@ def validate(val_loader, model, criterion):
     total_loss = 0
 
     for step, (images, labels) in enumerate(val_loader):
-        images = images.cuda()
-        labels = labels.cuda()
+        # images = images.cuda()
+        # labels = labels.cuda()
 
         preds = model(images)
-        labels_ = torch.zeros(torch.numel(labels), 10).cuda()
+        labels_ = torch.zeros(torch.numel(labels), 10, device=labels.device)
         labels_ = labels_.scatter_(1, labels.view(-1, 1), 1)
 
         loss = criterion(preds, labels_)
@@ -75,13 +75,12 @@ def train(train_loader, model, criterion, optimizer):
     list_acc = []
 
     for step, (images, labels) in enumerate(train_loader):
-
-        images = images.cuda()
-        labels = labels.cuda()
+        # images = images.cuda()
+        # labels = labels.cuda()
 
         preds = model(images)
 
-        labels_ = torch.zeros(torch.numel(labels), 10).cuda()
+        labels_ = torch.zeros(torch.numel(labels), 10, device=labels.device)
         labels_ = labels_.scatter_(1, labels.view(-1, 1), 1)
 
         # print("label: {} - prediction: {}".format(labels.detach().cpu().numpy()[0], preds.detach().cpu().numpy()[0]))
@@ -143,8 +142,9 @@ def app(opt):
         batch_size=opt.batch_size,
         shuffle=True)
 
-
-    model = n3ml.model.Wu2018(batch_size=opt.batch_size, time_interval=opt.time_interval).cuda()
+    model = n3ml.model.Wu2018(batch_size=opt.batch_size, time_interval=opt.time_interval)
+    if torch.cuda.is_available():
+        model = model.cuda()
 
     criterion = nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr = opt.lr)

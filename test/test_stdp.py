@@ -32,7 +32,7 @@ def app(opt):
     encoder = PoissonEncoder(opt.time_interval)
 
     # Define a model
-    model = DiehlAndCook2015(neurons=opt.neurons).cuda()
+    model = DiehlAndCook2015(neurons=opt.neurons)
 
     fig = None
     mat = None
@@ -51,7 +51,7 @@ def app(opt):
 
             spiked_images = encoder(images)
             spiked_images = spiked_images.view(opt.time_interval, -1)
-            spiked_images = spiked_images.cuda()
+            # spiked_images = spiked_images.cuda()
 
             # Train a model
             for t in range(opt.time_interval):
@@ -79,11 +79,11 @@ def app(opt):
                 print("{} images are used to train".format(step+1))
 
                 # save model
-                torch.save({
-                    'epoch': epoch,
-                    'step': step,
-                    'model_state_dict': model.state_dict()
-                }, 'pretrained/stdp_epoch-{}_step-{}.pt'.format(epoch, step+1))
+                # torch.save({
+                #     'epoch': epoch,
+                #     'step': step,
+                #     'model_state_dict': model.state_dict()
+                # }, 'pretrained/stdp_epoch-{}_step-{}.pt'.format(epoch, step+1))
 
 
 if __name__ == '__main__':
