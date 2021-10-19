@@ -45,13 +45,13 @@ def to_state_dict_loihi(model: n3ml.network.Network):
     # PyTorch and Keras have different order of shape in convolutional layer
     for k in state_dict:
         if len(state_dict[k].shape) > 2:
-            out_channels, in_channels, height, width = state_dict[k].shape
-            tmp = np.zeros((width, height, in_channels, out_channels))
-            for i1 in range(width):
-                for i2 in range(height):
+            out_channels, in_channels, height, width = state_dict[k].shape  # in torch, conv's shape orders
+            tmp = np.zeros((height, width, in_channels, out_channels))
+            for i1 in range(height):
+                for i2 in range(width):
                     for i3 in range(in_channels):
                         for i4 in range(out_channels):
-                            tmp[i1, i2, i3, i4] = state_dict[k][i4, i3, i2, i1]
+                            tmp[i1, i2, i3, i4] = state_dict[k][i4, i3, i1, i2]
             state_dict[k] = tmp
 
     return state_dict

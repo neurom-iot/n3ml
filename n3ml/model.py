@@ -16,10 +16,20 @@ class Voelker2015(n3ml.network.Network):
                  neurons: int,
                  input_size: int,
                  output_size: int,
-                 encoder: torch.Tensor = None,
-                 gain: torch.Tensor = None,
-                 bias: torch.Tensor = None):
+                 neuron_type: str,
+                 dt: float):
+        """
+            neuron_type에 대해서
+            지금은 입력된 neuron_type에 관계없이 n3ml.population.LIF를 사용하고 있습니다.
+
+            dt에 대해서
+            dt 입력 단위는 ms가 되어야 합니다. 예를 들어, 1ms를 입력한다면 1을 입력해야 하고
+            100ms를 입력하고 싶다면 100을 입력해야 합니다. 0.001로 입력한다면 이는 0.001s로
+            간주되기 때문에 단위를 ms로 수정하여 입력해야 합니다.
+        """
         super().__init__()
+        self.neuron_type = neuron_type
+        self.dt = dt
         self.add_component('pop', n3ml.population.NEF(neurons=neurons,
                                                       input_size=input_size,
                                                       output_size=output_size,
