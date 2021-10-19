@@ -27,7 +27,7 @@ def app(opt):
                         input_size=state_dict['ens_args']['input_dimensions'],
                         output_size=state_dict['ens_args']['output_dimensions'],
                         neuron_type=state_dict['ens_args']['neuron_type'],
-                        dt=state_dict['sim_args']['dt'])
+                        dt=state_dict['sim_args']['dt'] * 1000)
 
     model.pop.e.copy_(torch.tensor(state_dict['ens_args']['scaled_encoders']))
     model.pop.a.copy_(torch.tensor(state_dict['ens_args']['gain']))
