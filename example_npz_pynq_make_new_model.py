@@ -32,6 +32,6 @@ if __name__ == '__main__':
     parser.add_argument('--learning_rate', default=0.0001, type=float)
 
     # 실제 실행을 위해서는 경로가 수정되어야 합니다.
-    parser.add_argument('--save', default='data/npz/n3ml_de1-soc_20211019.npz')
+    parser.add_argument('--save', default='data/npz/n3ml_pynq_20211019.npz')
 
     app(parser.parse_args())
