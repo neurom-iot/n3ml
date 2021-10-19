@@ -14,7 +14,7 @@ def app(opt):
                         input_size=opt.input_dimensions,
                         output_size=opt.output_dimensions,
                         neuron_type=opt.neuron_type,
-                        dt=opt.dt)
+                        dt=opt.dt * 1000)
 
     state_dict = n3ml.to_state_dict_fpga(dt=opt.dt, lr=opt.learning_rate, model=model)
 
