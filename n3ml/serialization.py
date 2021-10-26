@@ -66,10 +66,42 @@ def save(state_dict: Any, mode: str, f: str) -> None:
     raise ValueError("Expected '{}' or '{}', but got '{}'".format('fpga', 'loihi', mode))
 
 
+def savez(state_dict: Any, mode: str, f: str, protocol=2) -> None:
+    if not f.endswith('.npz'):
+        f = f + '.npz'
+    import zipfile
+    from numpy.lib.npyio import zipfile_factory
+    from numpy.lib.format import write_array
+    import pickle
+    zipf = zipfile_factory(f, mode='w', compression=zipfile.ZIP_DEFLATED)
+    for key, val in state_dict.items():
+        fname = key + '.npy'
+        val = np.asanyarray(val)
+        with zipf.open(fname, 'w', force_zip64=True) as fid:
+            write_array(fid, val, allow_pickle=True)
+            pickle.dump(val, fid, protocol=protocol)
+
+
 def load(f: str, mode: str, allow_pickle: bool = True) -> Any:
     if not f.endswith('.npz'):
         f = f + '.npz'
+    # npz = np.load(f, protocol=2, allow_pickle=allow_pickle)
     npz = np.load(f, allow_pickle=allow_pickle)
+    if mode in ['pynq', 'de1-soc', 'loihi']:
+        state_dict = {}
+        for item in npz:
+            if mode == 'pynq':
+                state_dict[item] = npz[item].tolist()
+            elif mode == 'loihi':
+                state_dict[item] = np.array(npz[item])
+        return state_dict
+    raise ValueError("Expected '{}' or '{}', but got '{}'".format('fpga', 'loihi', mode))
+
+
+def _load(f: str, mode: str, allow_pickle: bool = True) -> Any:
+    if not f.endswith('.npz'):
+        f = f + '.npz'
+    npz = np.load(f, protocol=2, allow_pickle=allow_pickle)
     if mode in ['fpga', 'loihi']:
         state_dict = {}
         for item in npz:

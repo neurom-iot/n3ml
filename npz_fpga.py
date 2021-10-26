@@ -19,15 +19,23 @@ def app(opt):
 
     model = n3ml.model.Voelker2015(neurons=state_dict['ens_args']['n_neurons'],
                                    input_size=state_dict['ens_args']['input_dimensions'],
-                                   output_size=state_dict['ens_args']['output_dimensions'])
+                                   output_size=state_dict['ens_args']['output_dimensions'],
+                                   neuron_type=state_dict['ens_args']['neuron_type'],
+                                   dt=state_dict['sim_args']['dt'] * 1000)
     model.pop.e.copy_(torch.tensor(state_dict['ens_args']['scaled_encoders']))
     model.pop.a.copy_(torch.tensor(state_dict['ens_args']['gain']))
     model.pop.bias.copy_(torch.tensor(state_dict['ens_args']['bias']))
     model.pop.d.copy_(torch.tensor(state_dict['conn_args']['weights']))
 
-    state_dict = n3ml.to_state_dict_fpga(dt=0.001, lr=0.01, model=model)
+    state_dict = n3ml.to_state_dict_fpga(dt=state_dict['sim_args']['dt'],
+                                         lr=state_dict['conn_args']['learning_rate'],
+                                         model=model)
 
-    n3ml.save(state_dict, mode='fpga', f=opt.save)
+    print(state_dict)
+    print()
+
+    # n3ml.save(state_dict, mode='fpga', f=opt.save)
+    n3ml.savez(state_dict, mode='fpga', f=opt.save, protocol=2)
 
     state_dict = n3ml.load(f=opt.save, mode='fpga', allow_pickle=True)
 
@@ -39,6 +47,6 @@ if __name__ == '__main__':
 
     # 실제 실행을 위해서는 경로가 수정되어야 합니다.
     parser.add_argument('--npz', default='data/npz/fpen_args_2975099280.npz')
-    parser.add_argument('--save', default='data/npz/n3ml_202108101515.npz')
+    parser.add_argument('--save', default='data/npz/n3ml_202110260517.npz')
 
     app(parser.parse_args())
