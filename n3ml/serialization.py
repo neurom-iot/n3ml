@@ -77,20 +77,19 @@ def savez(state_dict: Any, mode: str, f: str, protocol=2) -> None:
     for key, val in state_dict.items():
         fname = key + '.npy'
         val = np.asanyarray(val)
-        with zipf.open(fname, 'w', force_zip64=True) as fid:
-            write_array(fid, val, allow_pickle=True)
+        with zipf.open(fname, 'w') as fid:
+            # write_array(fid, val, allow_pickle=True)
             pickle.dump(val, fid, protocol=protocol)
 
 
 def load(f: str, mode: str, allow_pickle: bool = True) -> Any:
     if not f.endswith('.npz'):
         f = f + '.npz'
-    # npz = np.load(f, protocol=2, allow_pickle=allow_pickle)
     npz = np.load(f, allow_pickle=allow_pickle)
-    if mode in ['pynq', 'de1-soc', 'loihi']:
+    if mode in ['pynq', 'de1-soc', 'loihi', 'fpga']:
         state_dict = {}
         for item in npz:
-            if mode == 'pynq':
+            if mode == 'fpga':  # TODO: Separate into 'pynq' and 'de1-soc'
                 state_dict[item] = npz[item].tolist()
             elif mode == 'loihi':
                 state_dict[item] = np.array(npz[item])
