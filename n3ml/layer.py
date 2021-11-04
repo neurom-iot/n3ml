@@ -332,3 +332,172 @@ class IF2d(torch.nn.Module):
         self.v[self.v >= self.v_th] = self.v_reset
         self.v[self.v < self.v_min] = self.v_min
         return self.s
+
+    '''-------------------------------------------------supplement neuron model-------------------------------------------------'''
+
+class LIF2d(Layer):
+    def __init__(self,
+                 planes:int,
+                 width:int,
+                 height:int,
+                 time_interval,
+                 dt =1.0,
+                 tau_rc = 3.0,
+                 leak=1.0,
+                 threshold=1.0,
+                 resting=0.0,
+                 v_min=None):
+        super().__init__()
+
+        self.dt = dt
+        self.tau_rc = tau_rc
+        self.neurons = planes*width*height
+        self.time_interval = time_interval
+        self.v_leak = leak
+        self.v_th = threshold
+        self.v_reset = resting
+        if v_min is None:
+            self.v_min = -10.0 * self.v_th
+        else:
+            self.v_min = self.v_reset
+        self.v = torch.zeros(planes, height,width).to('cuda:0')
+        self.tau_rc = torch.tensor(self.tau_rc)
+        self.s = torch.zeros((self.time_interval, planes,height,width)).to('cuda:0')
+
+    def forward(self, t, x):
+        # t: scalar
+        # x.size: [time_interval, batch_size=1, neurons]
+        # s.size: [time_interval, batch_size=1, neurons]
+        self.v[:] = torch.exp(-self.dt/self.tau_rc) * (self.v - self.v_reset) + self.v_reset
+        self.v[:] += x[t]
+        self.s[t, self.v >= self.v_th] = 1
+        self.v[self.v >= self.v_th] = self.v_reset
+        self.v[self.v < self.v_min] = self.v_min
+        return self.s
+
+
+
+class LIF1d(Layer):
+    def __init__(self, neurons,
+                 time_interval,
+                 dt =1.0,
+                 tau_rc = 3.0,
+                 leak=1.0,
+                 threshold=1.0,
+                 resting=0.0,
+                 v_min=None):
+        super().__init__()
+
+        self.dt = dt
+        self.tau_rc = tau_rc
+        self.neurons = neurons
+        self.time_interval = time_interval
+        self.v_leak = leak
+        self.v_th = threshold
+        self.v_reset = resting
+        if v_min is None:
+            self.v_min = -10.0 * self.v_th
+        else:
+            self.v_min = self.v_reset
+        self.v = torch.zeros(self.neurons).to('cuda:0')
+        self.tau_rc = torch.tensor(self.tau_rc)
+        self.s = torch.zeros((self.time_interval, 1, self.neurons)).to('cuda:0')
+
+    def forward(self, t, x):
+        # t: scalar
+        # x.size: [time_interval, batch_size=1, neurons]
+        # s.size: [time_interval, batch_size=1, neurons]
+        self.v[:] = torch.exp(-self.dt/self.tau_rc) * (self.v - self.v_reset) + self.v_reset
+        self.v += x[t, 0]
+        self.s[t, 0, self.v >= self.v_th] = 1
+        self.v[self.v >= self.v_th] = self.v_reset
+        self.v[self.v < self.v_min] = self.v_min
+        return self.s
+
+
+
+class CUBA_LIF2d(Layer):
+    def __init__(self,
+                 planes:int,
+                 width:int,
+                 height:int,
+                 time_interval,
+                 q =1.0,
+                 dt =1.0,
+                 tau_rc = 3.0,
+                 leak=1.0,
+                 threshold=1.0,
+                 resting=0.0,
+                 v_min=None):
+        super().__init__()
+
+        self.q = q
+        self.dt = dt
+        self.tau_rc = tau_rc
+        self.neurons = planes*width*height
+        self.time_interval = time_interval
+        self.v_leak = leak
+        self.v_th = threshold
+        self.v_reset = resting
+        if v_min is None:
+            self.v_min = -10.0 * self.v_th
+        else:
+            self.v_min = self.v_reset
+        self.v = torch.zeros(planes, height,width).to('cuda:0')
+        self.tau_rc = torch.tensor(self.tau_rc)
+        self.q = torch.tensor(self.q)
+        self.s = torch.zeros((self.time_interval, planes,height,width)).to('cuda:0')
+
+    def forward(self, t, x):
+        # t: scalar
+        # x.size: [time_interval, batch_size=1, neurons]
+        # s.size: [time_interval, batch_size=1, neurons]
+        self.v[:] = torch.exp(-self.dt/self.tau_rc) * (self.v - self.v_reset) + self.v_reset
+        self.v[:] += x[t] * self.q
+        self.s[t, self.v >= self.v_th] = 1
+        self.v[self.v >= self.v_th] = self.v_reset
+        self.v[self.v < self.v_min] = self.v_min
+        return self.s
+
+
+
+class CUBA_LIF1d(Layer):
+    def __init__(self, neurons,
+                 time_interval,
+                 q =1.0,
+                 dt =1.0,
+                 tau_rc = 3.0,
+                 leak=1.0,
+                 threshold=1.0,
+                 resting=0.0,
+                 v_min=None):
+        super().__init__()
+
+        self.q = q
+        self.dt = dt
+        self.tau_rc = tau_rc
+        self.neurons = neurons
+        self.time_interval = time_interval
+        self.v_leak = leak
+        self.v_th = threshold
+        self.v_reset = resting
+        if v_min is None:
+            self.v_min = -10.0 * self.v_th
+        else:
+            self.v_min = self.v_reset
+        self.v = torch.zeros(self.neurons).to('cuda:0')
+        self.tau_rc = torch.tensor(self.tau_rc)
+        self.q = torch.tensor(self.q)
+        self.s = torch.zeros((self.time_interval, 1, self.neurons)).to('cuda:0')
+
+    def forward(self, t, x):
+        # t: scalar
+        # x.size: [time_interval, batch_size=1, neurons]
+        # s.size: [time_interval, batch_size=1, neurons]
+        self.v[:] = torch.exp(-self.dt/self.tau_rc) * (self.v - self.v_reset) + self.v_reset
+        self.v += x[t, 0] * self.q
+        self.s[t, 0, self.v >= self.v_th] = 1
+        self.v[self.v >= self.v_th] = self.v_reset
+        self.v[self.v < self.v_min] = self.v_min
+        return self.s
+
