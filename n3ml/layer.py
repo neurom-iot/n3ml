@@ -1,5 +1,5 @@
 import torch
-import torch.nn
+import torch.nn as nn
 import torch.autograd
 
 
@@ -273,6 +273,48 @@ class Linear(torch.nn.Module):
     def forward(self, t, x):
         self.s[t] = self.f(x[t])
         return self.s
+
+
+class BatchIF1d(Layer):
+    def __init__(self, neurons: int, batch_size: int, threshold: float, reset: float) -> None:
+        super(BatchIF1d, self).__init__()
+        self.neurons = neurons
+        self.batch_size = batch_size
+        self.register_buffer('voltage', torch.zeros(batch_size, neurons))
+        self.register_buffer('spike', torch.zeros(batch_size, neurons))
+        self.register_buffer('threshold', torch.tensor(threshold))
+        self.register_buffer('reset', torch.tensor(reset))
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        x: [batch size, neurons]
+        """
+        self.voltage += x
+        self.spike[:] = (self.voltage > self.threshold).float()
+        self.voltage.masked_fill_(self.voltage >= self.threshold, self.reset)
+        return self.spike
+
+
+class BatchIF2d(Layer):
+    def __init__(self, planes: int, height: int, width: int, batch_size: int, threshold: float, reset: float) -> None:
+        super(BatchIF2d, self).__init__()
+        self.planes = planes
+        self.height = height
+        self.width = width
+        self.batch_size = batch_size
+        self.register_buffer('voltage', torch.zeros(batch_size, planes, height, width))
+        self.register_buffer('spike', torch.zeros(batch_size, planes, height, width))
+        self.register_buffer('threshold', torch.tensor(threshold))
+        self.register_buffer('reset', torch.tensor(reset))
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        x: [batch size, channels, height, width]
+        """
+        self.voltage += x
+        self.spike[:] = (self.voltage > self.threshold).float()
+        self.voltage.masked_fill_(self.voltage >= self.threshold, self.reset)
+        return self.spike
 
 
 class IF1d(torch.nn.Module):

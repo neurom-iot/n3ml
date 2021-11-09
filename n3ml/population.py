@@ -106,10 +106,6 @@ class NEF(Population):
                  input_size: int,
                  output_size: int,
                  neuron_type: Type[LIF],
-                 # encoder: torch.Tensor = None,
-                 # gain: torch.Tensor = None,
-                 # bias: torch.Tensor = None,
-                 # decoder: torch.Tensor = None,
                  dt: float = 1.0,
                  tau_rc: float = 10.0,
                  v_th: float = 1.0,
@@ -127,9 +123,6 @@ class NEF(Population):
                                        rest=rest,
                                        reset=reset,
                                        tau_ref=tau_ref)
-        # self.register_buffer('e', torch.zeros(size=(neurons, input_size)) if encoder is None else encoder)
-        # self.register_buffer('a', torch.zeros(size=(neurons,)) if gain is None else gain)
-        # self.register_buffer('bias', torch.zeros(size=(neurons,)) if bias is None else bias)
         self.register_buffer('e', torch.zeros(size=(neurons, input_size)))
         self.register_buffer('a', torch.zeros(size=(neurons,)))
         self.register_buffer('bias', torch.zeros(size=(neurons,)))

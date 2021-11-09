@@ -37,7 +37,7 @@ def app(opt):
     # n3ml.save(state_dict, mode='fpga', f=opt.save)
     n3ml.savez(state_dict, mode='fpga', f=opt.save, protocol=2)
 
-    state_dict = n3ml.load(f=opt.save, mode='fpga', allow_pickle=True)
+    # state_dict = n3ml.load(f=opt.save, mode='fpga', allow_pickle=True)
 
     print(state_dict)
 
@@ -47,6 +47,6 @@ if __name__ == '__main__':
 
     # 실제 실행을 위해서는 경로가 수정되어야 합니다.
     parser.add_argument('--npz', default='data/npz/fpen_args_2975099280.npz')
-    parser.add_argument('--save', default='data/npz/n3ml_202110260517.npz')
+    parser.add_argument('--save', default='data/npz/n3ml_202111021632.npz')
 
     app(parser.parse_args())

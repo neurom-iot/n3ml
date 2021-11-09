@@ -136,6 +136,6 @@ if __name__ == '__main__':
     parser.add_argument('--batch_size', default=64, type=int)
     parser.add_argument('--num_epochs', default=50, type=int)
     parser.add_argument('--lr', default=0.001, type=float)
-    parser.add_argument('--save', default='pretrained/npz_loihi_train.pt')
+    parser.add_argument('--save', default='data/npz/npz_loihi_train.pt')
 
     app(parser.parse_args())
