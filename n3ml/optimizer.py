@@ -132,15 +132,11 @@ def dydt2(t_j, t_i, d_k, tau):
 
 
 class Bohte:
-    def __init__(self):
-        pass
+    def __init__(self, lr: float = 0.0075) -> None:
+        self.lr = lr
 
-    def step(self, model, spiked_input, spiked_label, epoch):
-        # print(model)
-
-        # lr = 0.0001  #
-        # lr = 0.01
-        lr = 0.0075
+    def step(self, model, spiked_input, spiked_label):
+        lr = self.lf
 
         layer = []
         spike_time = [spiked_input]  # with input spike

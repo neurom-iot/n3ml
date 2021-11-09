@@ -237,19 +237,34 @@ class Hunsberger2015(n3ml.network.Network):
 
 
 class Bohte2002(n3ml.network.Network):
-    def __init__(self) -> None:
-        super().__init__()
-
-        self.add_component('fc1', Bohte(50, 10, time_constant=7.0))
-        self.add_component('fc2', Bohte(10, 3, time_constant=7.0))
-        # self.add_component('fc', Bohte(50, 3))
+    def __init__(self,
+                 in_neurons: int = 50,
+                 hid_neurons: int = 10,
+                 out_neurons: int = 3,
+                 delays: int = 16,
+                 threshold: float = 1.0,
+                 time_constant: float = 7.0) -> None:
+        super(Bohte2002, self).__init__()
+        self.in_neurons = in_neurons
+        self.hid_neurons = hid_neurons
+        self.out_neurons = out_neurons
+        self.delays = delays
+        self.threshold = threshold
+        self.time_constant = time_constant
+        self.add_component('fc1', Bohte(in_neurons,
+                                        hid_neurons,
+                                        delays=delays,
+                                        threshold=threshold,
+                                        time_constant=time_constant))
+        self.add_component('fc2', Bohte(hid_neurons,
+                                        out_neurons,
+                                        delays=delays,
+                                        threshold=threshold,
+                                        time_constant=time_constant))
 
     def forward(self, t: torch.Tensor, x: torch.Tensor) -> torch.Tensor:
-        # t: 현재 시점
-        # x: 스파이크 발화 시점에 대한 정보
         x = self.fc1(t, x)
         x = self.fc2(t, x)
-        # x = self.fc(t, x)
         return x
 
 
