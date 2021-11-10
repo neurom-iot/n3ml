@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-import torch.autograd
+import torch.autograd as autograd
 
 
 class Layer(torch.nn.Module):
@@ -89,6 +89,75 @@ class Wu(torch.nn.Module):
 
     def forward(self, x):
         return _Wu.apply(x)
+
+
+class _Wu_alternative(autograd.Function):
+    @staticmethod
+    def forward(ctx, voltages, threshold, alpha):
+        ctx.save_for_backward(voltages, threshold, alpha)
+        return voltages.gt(threshold).float()
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        x, threshold, alpha = ctx.saved_tensors
+        grad_input = grad_output.clone()
+        temp = abs(x - threshold) < alpha
+        grad_output = grad_input * temp.float()
+        return grad_output, None, None
+
+
+class Wu2d(nn.Module):
+    def __init__(self,
+                batch_size: int,
+                planes: int,
+                height: int,
+                width: int,
+                leakage: float = 0.2,
+                threshold: float = 0.5,
+                alpha: float = 0.5) -> None:
+        super(Wu2d, self).__init__()
+        self.batch_size = batch_size
+        self.planes = planes
+        self.height = height
+        self.width = width
+        self.leakage = leakage
+        self.threshold = torch.tensor(threshold)
+        self.alpha = torch.tensor(alpha)
+
+    def forward(self, x, v, s):
+        # self.v *= self.leakage * (1.0 - self.s)
+        # self.v += x
+        v = v * self.leakage * (1.0 - s) + x
+        s = _Wu_alternative.apply(v, self.threshold, self.alpha)
+        return s
+
+    def extra_repr(self) -> str:
+        return 'batch_size={}, planes={}, height={}, width={}, leakage={}, threshold={}, alpha={}'.format(
+            self.batch_size, self.planes, self.height, self.width, self.leakage, self.threshold, self.alpha)
+
+
+class Wu1d(nn.Module):
+    def __init__(self,
+                batch_size: int,
+                neurons: int,
+                leakage: float = 0.2,
+                threshold: float = 0.5,
+                alpha: float = 0.5) -> None:
+        super(Wu1d, self).__init__()
+        self.batch_size = batch_size
+        self.neurons = neurons
+        self.leakage = leakage
+        self.threshold = torch.tensor(threshold)
+        self.alpha = torch.tensor(alpha)
+
+    def forward(self, x, v, s):
+        v = v * self.leakage * (1.0 - s) + x
+        s = _Wu_alternative.apply(v, self.threshold, self.alpha)
+        return s
+
+    def extra_repr(self) -> str:
+        return 'batch_size={}, neurons={}, leakage={}, threshold={}, alpha={}'.format(
+            self.batch_size, self.neurons, self.leakage, self.threshold, self.alpha)
 
 
 class Bohte(Layer):
