@@ -51,7 +51,6 @@ def validate(val_loader, model, criterion, opt):
             images = images.cuda()
             labels = labels.cuda()
 
-            model.init()
             preds = model(images, opt.num_steps)
             labels_ = torch.zeros(torch.numel(labels), 10, device=labels.device)
             labels_ = labels_.scatter_(1, labels.view(-1, 1), 1)
@@ -79,7 +78,6 @@ def train(train_loader, model, criterion, optimizer, opt):
         images = images.cuda()
         labels = labels.cuda()
 
-        model.init()
         preds = model(images, opt.num_steps)
 
         labels_ = torch.zeros(torch.numel(labels), 10, device=labels.device)
