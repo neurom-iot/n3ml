@@ -12,7 +12,7 @@ from n3ml.layer import Wu1d, Wu2d
 
 
 class Wu2018(Network):
-    def __int__(self, batch_size: int) -> None:
+    def __init__(self, batch_size: int) -> None:
         super(Wu2018, self).__init__()
         self.batch_size = batch_size
 
@@ -125,7 +125,7 @@ def app(opt):
             transform=torchvision.transforms.Compose([transforms.ToTensor()])),
         batch_size=opt.batch_size)
 
-    model = Wu2018()
+    model = Wu2018(batch_size=opt.batch_size)
 
     model.add_module('conv1', nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1))
     model.add_module('lif1', Wu2d(opt.batch_size, 32, 28, 28))
