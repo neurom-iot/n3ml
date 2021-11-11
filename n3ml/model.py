@@ -4,7 +4,7 @@ import torch.distributions.uniform
 
 from n3ml.layer import IF1d, IF2d, Conv2d, AvgPool2d, Linear, Bohte, TravanaeiAndMaida
 
-import n3ml.network
+from n3ml.network import Network
 import n3ml.layer
 import n3ml.population
 import n3ml.connection
@@ -45,44 +45,47 @@ class Voelker2015(n3ml.network.Network):
             p.init_params()
 
 
-class Wu2018(n3ml.network.Network):
-    def __init__(self, batch_size, time_interval):
-        super().__init__()
-        self.conv1         = nn.Conv2d(1, 32,  kernel_size=3, stride=1, padding=1)
-        self.conv2         = nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1)
-        self.fc1           = nn.Linear(7 * 7 * 32, 128)
-        self.fc2           = nn.Linear(128, 10)
-        self.avgpool       = nn.AvgPool2d(kernel_size=2)
-        self.batch_size    = batch_size
-        self.time_interval = time_interval
+class Wu2018(Network):
+    def __init__(self, batch_size: int) -> None:
+        super(Wu2018, self).__init__()
+        self.batch_size = batch_size
+        self.conv1 = nn.Conv2d(1, 32,  kernel_size=3, stride=1, padding=1)
+        self.conv1_lif = n3ml.layer.Wu()
+        self.apool1 = nn.AvgPool2d(kernel_size=2)
+        self.conv2 = nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1)
+        self.conv2_lif = n3ml.layer.Wu()
+        self.apool2 = nn.AvgPool2d(kernel_size=2)
+        self.flatten = nn.Flatten()
+        self.fc1 = nn.Linear(7 * 7 * 32, 128)
+        self.fc1_lif = n3ml.layer.Wu()
+        self.fc2 = nn.Linear(128, 10)
+        self.fc2_lif = n3ml.layer.Wu()
 
-    def mem_update(self, ops, x, mem, spike):
+    def mem_update(self, ops, x, mem, spike, wu):
         mem = mem * 0.2 * (1. - spike) + ops(x)
-        STBP_spike = n3ml.layer.Wu()
-        spike      = STBP_spike(mem)
+        spike = wu(mem)
         return mem, spike
 
-    def forward(self, input):
-        c1_mem = c1_spike = torch.zeros(self.batch_size, 32, 28, 28, device=input.device)
-        c2_mem = c2_spike = torch.zeros(self.batch_size, 32, 14, 14, device=input.device)
+    def forward(self, images: torch.Tensor, num_steps: int) -> torch.Tensor:
+        c1_mem = c1_spike = torch.zeros(self.batch_size, 32, 28, 28, device=images.device)
+        c2_mem = c2_spike = torch.zeros(self.batch_size, 32, 14, 14, device=images.device)
 
-        h1_mem = h1_spike               = torch.zeros(self.batch_size, 128, device=input.device)
-        h2_mem = h2_spike = h2_sumspike = torch.zeros(self.batch_size, 10, device=input.device)
+        h1_mem = h1_spike = torch.zeros(self.batch_size, 128, device=images.device)
+        h2_mem = h2_spike = h2_sumspike = torch.zeros(self.batch_size, 10, device=images.device)
 
-        for time in range(self.time_interval):
+        for time in range(num_steps):
+            x = (images > torch.rand(images.size(), device=images.device)).float()
 
-            x = input > torch.rand(input.size(), device=input.device)
+            c1_mem, c1_spike = self.mem_update(self.conv1, x.float(), c1_mem, c1_spike, self.conv1_lif)
+            x = self.apool1(c1_spike)
 
-            c1_mem, c1_spike = self.mem_update(self.conv1, x.float(), c1_mem, c1_spike)
-            x = self.avgpool(c1_spike)
+            c2_mem, c2_spike = self.mem_update(self.conv2, x, c2_mem, c2_spike, self.conv2_lif)
+            x = self.apool2(c2_spike)
 
-            c2_mem, c2_spike = self.mem_update(self.conv2,x, c2_mem,c2_spike)
-            x = self.avgpool(c2_spike)
+            x = self.flatten(x)
 
-            x = x.view(self.batch_size, -1)
-
-            h1_mem, h1_spike = self.mem_update(self.fc1, x, h1_mem, h1_spike)
-            h2_mem, h2_spike = self.mem_update(self.fc2, h1_spike, h2_mem,h2_spike)
+            h1_mem, h1_spike = self.mem_update(self.fc1, x, h1_mem, h1_spike, self.fc1_lif)
+            h2_mem, h2_spike = self.mem_update(self.fc2, h1_spike, h2_mem, h2_spike, self.fc2_lif)
             h2_sumspike += h2_spike
 
         outputs = h2_sumspike / self.time_interval
