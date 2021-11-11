@@ -48,6 +48,15 @@ We follows BindsNET[6] to supprot GPU acceleration in N3ML. Bascially, N3ML is i
 - Feel free to create issues/pull-requests if you have any issues.
 - Please read [CONTRIBUTING.md](CONTRIBUTING.md) if you are interested in contributing the project.
 
+## PyPI
+```
+python setup.py bdist_wheel
+```
+
+```
+python -m twine upload dist/*
+```
+
 ## Contributors
 
 ## References
