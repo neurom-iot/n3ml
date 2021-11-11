@@ -88,7 +88,7 @@ class Wu2018(Network):
             h2_mem, h2_spike = self.mem_update(self.fc2, h1_spike, h2_mem, h2_spike, self.fc2_lif)
             h2_sumspike += h2_spike
 
-        outputs = h2_sumspike / self.time_interval
+        outputs = h2_sumspike / num_steps
 
         return outputs
 
