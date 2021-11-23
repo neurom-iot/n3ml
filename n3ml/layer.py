@@ -5,7 +5,71 @@ import torch.autograd as autograd
 
 class Layer(torch.nn.Module):
     def __init__(self):
-        super().__init__()
+        super(Layer, self).__init__()
+
+
+class LIF1d(Layer):
+    """
+    현재 구현된 threshold와 leakage는 layer-wise scheme으로 볼 수 있다.
+    그러나, neuron-wise scheme의 지원이 필요할 수 있다.
+    """
+    def __init__(self,
+                 batch_size: int,
+                 neurons: int,
+                 threshold: float,
+                 leakage: float,
+                 reset: float = 0.0) -> None:
+        super(LIF1d, self).__init__()
+        self.register_buffer('th', torch.tensor(threshold))
+        self.register_buffer('leak', torch.tensor(leakage))
+        self.register_buffer('rst', torch.tensor(reset))
+        self.register_buffer('v', torch.zeros(batch_size, neurons))
+        self.register_buffer('s', torch.zeros(batch_size, neurons))
+
+    def reset_variables(self, batch_size: int) -> None:
+        self.v = torch.full(size=(batch_size, self.v.size(1)), fill_value=self.rst.item())
+        self.s = torch.zeros(size=(batch_size, self.s.size(1)))
+
+    def forward(self, x):
+        self.v = self.leak * self.v + x
+        self.s[:] = (self.v >= self.th).float()
+        self.v.masked_fill(self.v >= self.th, self.rst.item())
+        return self.s
+
+
+class LIF2d(Layer):
+    def __init__(self,
+                 batch_size: int,
+                 planes: int,
+                 height: int,
+                 width: int,
+                 threshold: float,
+                 leakage: float,
+                 reset: float = 0.0) -> None:
+        super(LIF2d, self).__init__()
+        self.register_buffer('th', torch.tensor(threshold))
+        self.register_buffer('leak', torch.tensor(leakage))
+        self.register_buffer('rst', torch.tensor(reset))
+        self.register_buffer('v', torch.zeros(batch_size, planes, height, width))
+        self.register_buffer('s', torch.zeros(batch_size, planes, height, width))
+
+    def reset_variables(self, batch_size: int) -> None:
+        self.v = torch.full(size=(batch_size,
+                                  self.v.size(1),
+                                  self.v.size(2),
+                                  self.v.size(3)),
+                            fill_value=self.rst.item(), device=self.v.device)
+        self.s = torch.zeros(size=(batch_size,
+                                   self.s.size(1),
+                                   self.s.size(2),
+                                   self.s.size(3)),
+                             device=self.s.device)
+
+    def forward(self, x):
+        self.v = self.leak * self.v + x
+        self.s[:] = (self.v >= self.th).float()
+        self.v.masked_fill(self.v >= self.th, self.rst.item())
+        return self.s
 
 
 def softplus(x, sigma=1.):

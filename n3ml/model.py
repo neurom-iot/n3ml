@@ -1,3 +1,5 @@
+from typing import List
+
 import torch
 import torch.nn as nn
 import torch.distributions.uniform
@@ -278,6 +280,9 @@ class Hunsberger2015_SNN(Network):
         for m in self.named_modules():
             if isinstance(m[1], LIF1d) or isinstance(m[1], LIF2d):
                 m[1].reset_variables(batch_size=batch_size)
+
+    def update_thresholds(self, thresholds: List[float]) -> None:
+        pass
 
     def forward(self, images: torch.Tensor, num_steps: int) -> torch.Tensor:
         for t in range(num_steps):
