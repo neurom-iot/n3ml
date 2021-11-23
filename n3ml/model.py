@@ -266,11 +266,13 @@ class Hunsberger2015_SNN(Network):
             if not isinstance(m[1], SoftLIF):
                 self.add_module(m[0], m[1])
                 if isinstance(m[1], nn.Conv2d):
-                    self.add_module('{}.LIF2d'.format(m[0]), LIF2d(plains=shapes[m[0]][1],
+                    self.add_module('{}.LIF2d'.format(m[0]), LIF2d(batch_size=shapes[m[0]][0],
+                                                                   plains=shapes[m[0]][1],
                                                                    height=shapes[m[0]][2],
                                                                    width=shapes[m[0]][3]))
                 elif isinstance(m[1], nn.Linear):
-                    self.add_module('{}.LIF1d'.format(m[0]), LIF1d(neurons=shapes[m[0]][1]))
+                    self.add_module('{}.LIF1d'.format(m[0]), LIF1d(batch_size=shapes[m[0]][0],
+                                                                   neurons=shapes[m[0]][1]))
 
     def reset_variables(self, batch_size: int) -> None:
         for m in self.named_modules():
