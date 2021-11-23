@@ -9,6 +9,7 @@ import n3ml.layer
 import n3ml.population
 import n3ml.connection
 import n3ml.learning
+from n3ml.layer import SoftLIF, LIF1d, LIF2d
 
 
 class Voelker2015(n3ml.network.Network):
@@ -237,6 +238,52 @@ class Hunsberger2015(n3ml.network.Network):
         x = x.view(x.size(0), 256)
         x = self.classifier(x)
         return x
+
+
+class Hunsberger2015_ANN(Network):
+    def __init__(self):
+        super(Hunsberger2015_ANN, self).__init__()
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        for m in self.named_children():
+            x = m[1](x)
+        return x
+
+
+class Hunsberger2015_SNN(Network):
+    def __init__(self, ann: Hunsberger2015_ANN, fake_images: torch.Tensor) -> None:
+        super(Hunsberger2015_SNN, self).__init__()
+        # Get the output's size of a conv. layer or a fc. layer to generate
+        # spiking neuron model.
+        shapes = {}
+        fake_x = fake_images
+        for m in ann.named_modules():
+            fake_x = m[1](fake_x)
+            if isinstance(m[1], nn.Conv2d) or isinstance(m[1], nn.Linear):
+                shapes[m[0]] = fake_x.size()
+        # Construct a SNN based on an ANN.
+        for m in ann.named_modules():
+            if not isinstance(m[1], SoftLIF):
+                self.add_module(m[0], m[1])
+                if isinstance(m[1], nn.Conv2d):
+                    self.add_module('{}.LIF2d'.format(m[0]), LIF2d(plains=shapes[m[0]][1],
+                                                                   height=shapes[m[0]][2],
+                                                                   width=shapes[m[0]][3]))
+                elif isinstance(m[1], nn.Linear):
+                    self.add_module('{}.LIF1d'.format(m[0]), LIF1d(neurons=shapes[m[0]][1]))
+
+    def reset_variables(self, batch_size: int) -> None:
+        for m in self.named_modules():
+            if isinstance(m[1], LIF1d) or isinstance(m[1], LIF2d):
+                m[1].reset_variables(batch_size=batch_size)
+
+    def forward(self, images: torch.Tensor, num_steps: int) -> torch.Tensor:
+        for t in range(num_steps):
+            x = None  # TODO: encode 'x'
+            for m in self.named_children():
+                x = m[1](x)
+        o = x
+        return o
 
 
 class Bohte2002(n3ml.network.Network):

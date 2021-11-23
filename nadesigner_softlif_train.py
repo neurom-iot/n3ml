@@ -83,7 +83,9 @@ def app(opt):
             train=True,
             transform=torchvision.transforms.Compose([
                 torchvision.transforms.RandomCrop(24),
-                torchvision.transforms.ToTensor()])),
+                torchvision.transforms.RandomHorizontalFlip(),
+                torchvision.transforms.ToTensor(),
+                torchvision.transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))])),
         batch_size=opt.batch_size,
         shuffle=True)
 
@@ -93,7 +95,8 @@ def app(opt):
             train=False,
             transform=torchvision.transforms.Compose([
                 torchvision.transforms.CenterCrop(24),
-                torchvision.transforms.ToTensor()])),
+                torchvision.transforms.ToTensor(),
+                torchvision.transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))])),
         batch_size=opt.batch_size)
 
     model = Hunsberger2015()
@@ -117,9 +120,10 @@ def app(opt):
 
     criterion = nn.CrossEntropyLoss()
 
-    optimizer = torch.optim.SGD(model.parameters(), lr=opt.lr, momentum=opt.momentum)
+    optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr)
+    # optimizer = torch.optim.SGD(model.parameters(), lr=opt.lr, momentum=opt.momentum)
 
-    lr_scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[30, 60, 90])
+    # lr_scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[30, 60, 90])
 
     best_acc = 0
 
@@ -141,7 +145,7 @@ def app(opt):
             torch.save(state, opt.pretrained)
             print('in test, epoch: {} - best accuracy: {} - loss: {}'.format(epoch, best_acc, val_loss))
 
-        lr_scheduler.step()
+        # lr_scheduler.step()
 
 
 if __name__ == '__main__':
@@ -149,10 +153,10 @@ if __name__ == '__main__':
 
     parser.add_argument('--data', default='data')
     parser.add_argument('--num_classes', default=10, type=int)
-    parser.add_argument('--num_epochs', default=120, type=int)
+    parser.add_argument('--num_epochs', default=200, type=int)
     parser.add_argument('--batch_size', default=64, type=int)
-    parser.add_argument('--lr', default=4e-2, type=float)
-    parser.add_argument('--momentum', default=0.9, type=float)
+    parser.add_argument('--lr', default=1e-3, type=float)
+    # parser.add_argument('--momentum', default=0.9, type=float)
     parser.add_argument('--pretrained', default='pretrained/softlif_dynamic.pt')
 
     parser.add_argument('--amplitude', default=0.063, type=float)
