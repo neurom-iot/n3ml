@@ -27,8 +27,8 @@ class LIF1d(Layer):
         self.register_buffer('s', torch.zeros(batch_size, neurons))
 
     def reset_variables(self, batch_size: int) -> None:
-        self.v = torch.full(size=(batch_size, self.v.size(1)), fill_value=self.rst.item())
-        self.s = torch.zeros(size=(batch_size, self.s.size(1)))
+        self.v = torch.full(size=(batch_size, self.v.size(1)), fill_value=self.rst.item(), device=self.v.device)
+        self.s = torch.zeros(size=(batch_size, self.s.size(1)), device=self.s.device)
 
     def forward(self, x):
         self.v = self.leak * self.v + x
@@ -54,15 +54,9 @@ class LIF2d(Layer):
         self.register_buffer('s', torch.zeros(batch_size, planes, height, width))
 
     def reset_variables(self, batch_size: int) -> None:
-        self.v = torch.full(size=(batch_size,
-                                  self.v.size(1),
-                                  self.v.size(2),
-                                  self.v.size(3)),
+        self.v = torch.full(size=(batch_size, self.v.size(1), self.v.size(2), self.v.size(3)),
                             fill_value=self.rst.item(), device=self.v.device)
-        self.s = torch.zeros(size=(batch_size,
-                                   self.s.size(1),
-                                   self.s.size(2),
-                                   self.s.size(3)),
+        self.s = torch.zeros(size=(batch_size, self.s.size(1), self.s.size(2), self.s.size(3)),
                              device=self.s.device)
 
     def forward(self, x):
