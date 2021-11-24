@@ -30,7 +30,7 @@ class LIF1d(Layer):
         self.v = torch.full(size=(batch_size, self.v.size(1)), fill_value=self.rst.item(), device=self.v.device)
         self.s = torch.zeros(size=(batch_size, self.s.size(1)), device=self.s.device)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         self.v = self.leak * self.v + x
         self.s[:] = (self.v >= self.th).float()
         self.v.masked_fill(self.v >= self.th, self.rst.item())
@@ -59,11 +59,92 @@ class LIF2d(Layer):
         self.s = torch.zeros(size=(batch_size, self.s.size(1), self.s.size(2), self.s.size(3)),
                              device=self.s.device)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         self.v = self.leak * self.v + x
         self.s[:] = (self.v >= self.th).float()
         self.v.masked_fill(self.v >= self.th, self.rst.item())
         return self.s
+
+
+class SoftIF1d(nn.Module):
+    def __init__(self, batch_size: int, num_features: int, threshold: float = 1.0) -> None:
+        """
+            v: [batch size, # features] membrane potentials
+            s: [batch size, # features] spikes
+        """
+        super(SoftIF1d, self).__init__()
+        self.batch_size = batch_size
+        self.num_features = num_features
+        self.threshold = threshold
+        self.v = torch.zeros(size=(batch_size, num_features),
+                             device='cuda' if torch.cuda.is_available() else 'cpu')
+        self.s = torch.zeros(size=(batch_size, num_features),
+                             device='cuda' if torch.cuda.is_available() else 'cpu')
+        # self.v = torch.zeros(size=(batch_size, num_features))
+        # self.s = torch.zeros(size=(batch_size, num_features))
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+            x.size: [batch size, # features]
+
+        :param x:
+        :return:
+        """
+        self.v += x
+        self.s[:] = (self.v >= self.threshold).float()
+        self.v[self.v >= self.threshold] -= self.threshold
+        return self.s
+
+    def extra_repr(self) -> str:
+        print('v.device: {}, v: {}'.format(self.v.device, self.v))
+        print('s.device: {}, s: {}'.format(self.s.device, self.s))
+        return 'batch_size={}, # features={}, threshold={}'.format(
+            self.batch_size, self.num_features, self.threshold
+        )
+
+    def init_vars(self):
+        self.v.fill_(0.0)
+        self.s.fill_(0.0)
+
+
+class SoftIF2d(nn.Module):
+    def __init__(self, batch_size: int, num_channels: int, height: int, width: int, threshold: float = 1.0) -> None:
+        super(SoftIF2d, self).__init__()
+        self.batch_size = batch_size
+        self.num_channels = num_channels
+        self.height = height
+        self.width = width
+        self.threshold = threshold
+        self.v = torch.zeros(size=(batch_size, num_channels, height, width),
+                             device='cuda' if torch.cuda.is_available() else 'cpu')
+        self.s = torch.zeros(size=(batch_size, num_channels, height, width),
+                             device='cuda' if torch.cuda.is_available() else 'cpu')
+        # self.v = torch.zeros(size=(batch_size, num_channels, height, width))
+        # self.s = torch.zeros(size=(batch_size, num_channels, height, width))
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+            x: [batch size, # channels, height, width] input currents
+            v: [batch size, # channels, height, width] membrane potentials
+            s: [batch size, # channels, height, width] spikes
+        :param x:
+        :return:
+        """
+        self.v += x
+        self.s[:] = (self.v >= self.threshold).float()
+        self.v[self.v >= self.threshold] -= self.threshold
+        return self.s
+
+    def extra_repr(self) -> str:
+        print('v.device: {}, v: {}'.format(self.v.device, self.v))
+        print('s.device: {}, s: {}'.format(self.s.device, self.s))
+        return 'batch_size={}, # channels={}, height={}, width={}, threshold={}'.format(
+            self.batch_size, self.num_channels, self.height, self.width, self.threshold
+        )
+
+    def init_vars(self):
+        self.v.fill_(0.0)
+        self.s.fill_(0.0)
 
 
 def softplus(x, sigma=1.):

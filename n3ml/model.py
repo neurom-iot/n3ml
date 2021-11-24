@@ -1,4 +1,5 @@
-from typing import List
+import math
+from typing import List, Union
 
 import torch
 import torch.nn as nn
@@ -11,7 +12,7 @@ import n3ml.layer
 import n3ml.population
 import n3ml.connection
 import n3ml.learning
-from n3ml.layer import SoftLIF, LIF1d, LIF2d
+from n3ml.layer import SoftLIF, LIF1d, LIF2d, SoftIF1d, SoftIF2d
 
 
 class Voelker2015(n3ml.network.Network):
@@ -347,6 +348,334 @@ class TravanaeiAndMaida2017(n3ml.network.Network):
     def reset_variables(self, **kwargs):
         for l in self.layer.values():
             l.reset_variables(**kwargs)
+
+
+class VGG16(nn.Module):
+    def __init__(self):
+        super(VGG16, self).__init__()
+        self.conv1 = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv1_relu = nn.ReLU(inplace=True)
+        self.conv1_drop = nn.Dropout(p=0.2, inplace=False)
+        self.conv2 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv2_relu = nn.ReLU(inplace=True)
+        self.conv2_avgpool = nn.AvgPool2d(kernel_size=2, stride=2, padding=0)
+        self.conv3 = nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv3_relu = nn.ReLU(inplace=True)
+        self.conv3_drop = nn.Dropout(p=0.2, inplace=False)
+        self.conv4 = nn.Conv2d(128, 128, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv4_relu = nn.ReLU(inplace=True)
+        self.conv4_avgpool = nn.AvgPool2d(kernel_size=2, stride=2, padding=0)
+        self.conv5 = nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv5_relu = nn.ReLU(inplace=True)
+        self.conv5_drop = nn.Dropout(p=0.2, inplace=False)
+        self.conv6 = nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv6_relu = nn.ReLU(inplace=True)
+        self.conv6_drop = nn.Dropout(p=0.2, inplace=False)
+        self.conv7 = nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv7_relu = nn.ReLU(inplace=True)
+        self.conv7_avgpool = nn.AvgPool2d(kernel_size=2, stride=2, padding=0)
+        self.conv8 = nn.Conv2d(256, 512, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv8_relu = nn.ReLU(inplace=True)
+        self.conv8_drop = nn.Dropout(p=0.2, inplace=False)
+        self.conv9 = nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv9_relu = nn.ReLU(inplace=True)
+        self.conv9_drop = nn.Dropout(p=0.2, inplace=False)
+        self.conv10 = nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv10_relu = nn.ReLU(inplace=True)
+        self.conv10_avgpool = nn.AvgPool2d(kernel_size=2, stride=2, padding=0)
+        self.conv11 = nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv11_relu = nn.ReLU(inplace=True)
+        self.conv11_drop = nn.Dropout(p=0.2, inplace=False)
+        self.conv12 = nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv12_relu = nn.ReLU(inplace=True)
+        self.conv12_drop = nn.Dropout(p=0.2, inplace=False)
+        self.conv13 = nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv13_relu = nn.ReLU(inplace=True)
+        self.conv13_drop = nn.Dropout(p=0.2, inplace=False)
+        self.fc14 = nn.Linear(in_features=2048, out_features=4096, bias=False)
+        self.fc14_relu = nn.ReLU(inplace=True)
+        self.fc14_drop = nn.Dropout(p=0.5, inplace=False)
+        self.fc15 = nn.Linear(in_features=4096, out_features=4096, bias=False)
+        self.fc15_relu = nn.ReLU(inplace=True)
+        self.fc15_drop = nn.Dropout(p=0.5, inplace=False)
+        self.fc16 = nn.Linear(in_features=4096, out_features=10, bias=False)
+
+        self._initialize_weights()
+
+    def _initialize_weights(self):
+        #############################
+        #   @author: Nitin Rathi    #
+        #############################
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
+                m.weight.data.normal_(0, math.sqrt(2. / n))
+                if m.bias is not None:
+                    m.bias.data.zero_()
+            elif isinstance(m, nn.Linear):
+                m.weight.data.normal_(0, 0.01)
+                if m.bias is not None:
+                    m.bias.data.zero_()
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.conv1_relu(x)
+        x = self.conv1_drop(x)
+        x = self.conv2(x)
+        x = self.conv2_relu(x)
+        x = self.conv2_avgpool(x)
+        x = self.conv3(x)
+        x = self.conv3_relu(x)
+        x = self.conv3_drop(x)
+        x = self.conv4(x)
+        x = self.conv4_relu(x)
+        x = self.conv4_avgpool(x)
+        x = self.conv5(x)
+        x = self.conv5_relu(x)
+        x = self.conv5_drop(x)
+        x = self.conv6(x)
+        x = self.conv6_relu(x)
+        x = self.conv6_drop(x)
+        x = self.conv7(x)
+        x = self.conv7_relu(x)
+        x = self.conv7_avgpool(x)
+        x = self.conv8(x)
+        x = self.conv8_relu(x)
+        x = self.conv8_drop(x)
+        x = self.conv9(x)
+        x = self.conv9_relu(x)
+        x = self.conv9_drop(x)
+        x = self.conv10(x)
+        x = self.conv10_relu(x)
+        x = self.conv10_avgpool(x)
+        x = self.conv11(x)
+        x = self.conv11_relu(x)
+        x = self.conv11_drop(x)
+        x = self.conv12(x)
+        x = self.conv12_relu(x)
+        x = self.conv12_drop(x)
+        x = self.conv13(x)
+        x = self.conv13_relu(x)
+        x = self.conv13_drop(x)
+        x = x.view(x.size(0), -1)
+        x = self.fc14(x)
+        x = self.fc14_relu(x)
+        x = self.fc14_drop(x)
+        x = self.fc15(x)
+        x = self.fc15_relu(x)
+        x = self.fc15_drop(x)
+        x = self.fc16(x)
+        return x
+
+
+class SVGG16(nn.Module):
+    def __init__(self, vgg16, batch_size: int, threshold: List[float] = None) -> None:
+        super(SVGG16, self).__init__()
+        self.batch_size = batch_size
+        if not threshold:
+            threshold = [1.0] * 16
+        self.threshold = threshold
+        self.conv1 = vgg16.conv1
+        self.conv1_if = SoftIF2d(batch_size=batch_size, num_channels=64, height=32, width=32, threshold=threshold[0])
+        self.conv1_drop = vgg16.conv1_drop
+        self.conv2 = vgg16.conv2
+        self.conv2_if = SoftIF2d(batch_size=batch_size, num_channels=64, height=32, width=32, threshold=threshold[1])
+        self.conv2_avgpool = vgg16.conv2_avgpool
+        self.conv3 = vgg16.conv3
+        self.conv3_if = SoftIF2d(batch_size=batch_size, num_channels=128, height=16, width=16, threshold=threshold[2])
+        self.conv3_drop = vgg16.conv3_drop
+        self.conv4 = vgg16.conv4
+        self.conv4_if = SoftIF2d(batch_size=batch_size, num_channels=128, height=16, width=16, threshold=threshold[3])
+        self.conv4_avgpool = vgg16.conv4_avgpool
+        self.conv5 = vgg16.conv5
+        self.conv5_if = SoftIF2d(batch_size=batch_size, num_channels=256, height=8, width=8, threshold=threshold[4])
+        self.conv5_drop = vgg16.conv5_drop
+        self.conv6 = vgg16.conv6
+        self.conv6_if = SoftIF2d(batch_size=batch_size, num_channels=256, height=8, width=8, threshold=threshold[5])
+        self.conv6_drop = vgg16.conv6_drop
+        self.conv7 = vgg16.conv7
+        self.conv7_if = SoftIF2d(batch_size=batch_size, num_channels=256, height=8, width=8, threshold=threshold[6])
+        self.conv7_avgpool = vgg16.conv7_avgpool
+        self.conv8 = vgg16.conv8
+        self.conv8_if = SoftIF2d(batch_size=batch_size, num_channels=512, height=4, width=4, threshold=threshold[7])
+        self.conv8_drop = vgg16.conv8_drop
+        self.conv9 = vgg16.conv9
+        self.conv9_if = SoftIF2d(batch_size=batch_size, num_channels=512, height=4, width=4, threshold=threshold[8])
+        self.conv9_drop = vgg16.conv9_drop
+        self.conv10 = vgg16.conv10
+        self.conv10_if = SoftIF2d(batch_size=batch_size, num_channels=512, height=4, width=4, threshold=threshold[9])
+        self.conv10_avgpool = vgg16.conv10_avgpool
+        self.conv11 = vgg16.conv11
+        self.conv11_if = SoftIF2d(batch_size=batch_size, num_channels=512, height=2, width=2, threshold=threshold[10])
+        self.conv11_drop = vgg16.conv11_drop
+        self.conv12 = vgg16.conv12
+        self.conv12_if = SoftIF2d(batch_size=batch_size, num_channels=512, height=2, width=2, threshold=threshold[11])
+        self.conv12_drop = vgg16.conv12_drop
+        self.conv13 = vgg16.conv13
+        self.conv13_if = SoftIF2d(batch_size=batch_size, num_channels=512, height=2, width=2, threshold=threshold[12])
+        self.conv13_drop = vgg16.conv13_drop
+        self.fc14 = vgg16.fc14
+        self.fc14_if = SoftIF1d(batch_size=batch_size, num_features=4096, threshold=threshold[13])
+        self.fc14_drop = vgg16.fc14_drop
+        self.fc15 = vgg16.fc15
+        self.fc15_if = SoftIF1d(batch_size=batch_size, num_features=4096, threshold=threshold[14])
+        self.fc15_drop = vgg16.fc15_drop
+        self.fc16 = vgg16.fc16
+        self.fc16_if = SoftIF1d(batch_size=batch_size, num_features=10, threshold=threshold[15])
+
+    def update_threshold(self, threshold: List[float]) -> None:
+        self.conv1_if.threshold = threshold[0]
+        self.conv2_if.threshold = threshold[1]
+        self.conv3_if.threshold = threshold[2]
+        self.conv4_if.threshold = threshold[3]
+        self.conv5_if.threshold = threshold[4]
+        self.conv6_if.threshold = threshold[5]
+        self.conv7_if.threshold = threshold[6]
+        self.conv8_if.threshold = threshold[7]
+        self.conv9_if.threshold = threshold[8]
+        self.conv10_if.threshold = threshold[9]
+        self.conv11_if.threshold = threshold[10]
+        self.conv12_if.threshold = threshold[11]
+        self.conv13_if.threshold = threshold[12]
+        self.fc14_if.threshold = threshold[13]
+        self.fc15_if.threshold = threshold[14]
+        self.fc16_if.threshold = threshold[15]
+
+    def forward(self, images: torch.Tensor,
+                num_steps: int,
+                find_max_inp: bool = False,
+                find_max_layer: int = 0) -> Union[torch.Tensor, float]:
+
+        self.init_neuron_models()
+        max_mem = 0.0
+        o = 0
+
+        for step in range(num_steps):
+            x = torch.mul(torch.le(torch.rand_like(images), torch.abs(images)*1.0).float(), torch.sign(images))
+
+            x = self.conv1(x)
+            if find_max_inp and find_max_layer == 0:
+                if x.max() > max_mem:
+                    max_mem = x.max()
+                continue
+            x = self.conv1_if(x)
+            x = self.conv1_drop(x)
+            x = self.conv2(x)
+            if find_max_inp and find_max_layer == 1:
+                if x.max() > max_mem:
+                    max_mem = x.max()
+                continue
+            x = self.conv2_if(x)
+            x = self.conv2_avgpool(x)
+            x = self.conv3(x)
+            if find_max_inp and find_max_layer == 2:
+                if x.max() > max_mem:
+                    max_mem = x.max()
+                continue
+            x = self.conv3_if(x)
+            x = self.conv3_drop(x)
+            x = self.conv4(x)
+            if find_max_inp and find_max_layer == 3:
+                if x.max() > max_mem:
+                    max_mem = x.max()
+                continue
+            x = self.conv4_if(x)
+            x = self.conv4_avgpool(x)
+            x = self.conv5(x)
+            if find_max_inp and find_max_layer == 4:
+                if x.max() > max_mem:
+                    max_mem = x.max()
+                continue
+            x = self.conv5_if(x)
+            x = self.conv5_drop(x)
+            x = self.conv6(x)
+            if find_max_inp and find_max_layer == 5:
+                if x.max() > max_mem:
+                    max_mem = x.max()
+                continue
+            x = self.conv6_if(x)
+            x = self.conv6_drop(x)
+            x = self.conv7(x)
+            if find_max_inp and find_max_layer == 6:
+                if x.max() > max_mem:
+                    max_mem = x.max()
+                continue
+            x = self.conv7_if(x)
+            x = self.conv7_avgpool(x)
+            x = self.conv8(x)
+            if find_max_inp and find_max_layer == 7:
+                if x.max() > max_mem:
+                    max_mem = x.max()
+                continue
+            x = self.conv8_if(x)
+            x = self.conv8_drop(x)
+            x = self.conv9(x)
+            if find_max_inp and find_max_layer == 8:
+                if x.max() > max_mem:
+                    max_mem = x.max()
+                continue
+            x = self.conv9_if(x)
+            x = self.conv9_drop(x)
+            x = self.conv10(x)
+            if find_max_inp and find_max_layer == 9:
+                if x.max() > max_mem:
+                    max_mem = x.max()
+                continue
+            x = self.conv10_if(x)
+            x = self.conv10_avgpool(x)
+            x = self.conv11(x)
+            if find_max_inp and find_max_layer == 10:
+                if x.max() > max_mem:
+                    max_mem = x.max()
+                continue
+            x = self.conv11_if(x)
+            x = self.conv11_drop(x)
+            x = self.conv12(x)
+            if find_max_inp and find_max_layer == 11:
+                if x.max() > max_mem:
+                    max_mem = x.max()
+                continue
+            x = self.conv12_if(x)
+            x = self.conv12_drop(x)
+            x = self.conv13(x)
+            if find_max_inp and find_max_layer == 12:
+                if x.max() > max_mem:
+                    max_mem = x.max()
+                continue
+            x = self.conv13_if(x)
+            x = self.conv13_drop(x)
+            x = x.view(x.size(0), -1)
+            x = self.fc14(x)
+            if find_max_inp and find_max_layer == 13:
+                if x.max() > max_mem:
+                    max_mem = x.max()
+                continue
+            x = self.fc14_if(x)
+            x = self.fc14_drop(x)
+            x = self.fc15(x)
+            if find_max_inp and find_max_layer == 14:
+                if x.max() > max_mem:
+                    max_mem = x.max()
+                continue
+            x = self.fc15_if(x)
+            x = self.fc15_drop(x)
+            x = self.fc16(x)
+            if find_max_inp and find_max_layer == 15:
+                if x.max() > max_mem:
+                    max_mem = x.max()
+                continue
+            x = self.fc16_if(x)
+
+            o += x
+
+        if find_max_inp:
+            return max_mem
+        return o
+
+    def init_neuron_models(self):
+        for m in self.named_children():
+            if isinstance(m[1], SoftIF1d) or isinstance(m[1], SoftIF2d):
+                m[1].init_vars()
 
 
 class Cao2015_Tailored(n3ml.network.Network):
