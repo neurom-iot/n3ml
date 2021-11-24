@@ -15,7 +15,7 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 
-from n3ml.model import VGG16
+from n3ml.model import VGG16, SVGG16
 
 
 def app(opt):
