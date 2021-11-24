@@ -514,6 +514,7 @@ class SVGG16(nn.Module):
         self.conv13 = vgg16.conv13
         self.conv13_if = SoftIF2d(batch_size=batch_size, num_channels=512, height=2, width=2, threshold=threshold[12])
         self.conv13_drop = vgg16.conv13_drop
+        self.flat = nn.Flatten()
         self.fc14 = vgg16.fc14
         self.fc14_if = SoftIF1d(batch_size=batch_size, num_features=4096, threshold=threshold[13])
         self.fc14_drop = vgg16.fc14_drop
@@ -644,7 +645,7 @@ class SVGG16(nn.Module):
                 continue
             x = self.conv13_if(x)
             x = self.conv13_drop(x)
-            x = x.view(x.size(0), -1)
+            x = self.flat(x)
             x = self.fc14(x)
             if find_max_inp and find_max_layer == 13:
                 if x.max() > max_mem:

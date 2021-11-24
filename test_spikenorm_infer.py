@@ -16,6 +16,7 @@ import torchvision
 import torchvision.transforms as transforms
 
 from n3ml.model import VGG16, SVGG16
+from n3ml.threshold import spikenorm
 
 
 def app(opt):
@@ -52,22 +53,11 @@ def app(opt):
 
     snn = SVGG16(ann, batch_size=opt.batch_size)
     snn.eval()
-    threshold = [0.0] * 16
-
-    with torch.no_grad():
-        for l in range(16):
-            for iter, (images, _) in enumerate(train_loader):
-                images = images.cuda()
-                max_mem = snn(images, num_steps=opt.num_steps, find_max_inp=True, find_max_layer=l)
-                threshold[l] = max(threshold[l], max_mem)
-                if iter == 0:
-                    break
-            print("{}-th layer's threshold={}".format(l, threshold[l]))
-            snn.update_threshold([th * opt.scaling for th in threshold])
-
-    threshold = [th * opt.scaling for th in threshold]
-
-    print("final thresholds={}".format(threshold))
+    threshold = spikenorm(train_loader=train_loader,
+                          encoder=lambda x: torch.mul(torch.le(torch.rand_like(x), torch.abs(x)*1.0).float(),
+                                                      torch.sign(x)),
+                          model=snn,
+                          num_steps=opt.num_steps)
 
     snn.update_threshold(threshold)
 
