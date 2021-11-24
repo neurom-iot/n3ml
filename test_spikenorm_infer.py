@@ -56,8 +56,7 @@ def app(opt):
     threshold = spikenorm(train_loader=train_loader,
                           encoder=lambda x: torch.mul(torch.le(torch.rand_like(x), torch.abs(x)*1.0).float(),
                                                       torch.sign(x)),
-                          model=snn,
-                          num_steps=opt.num_steps)
+                          model=snn, num_steps=opt.num_steps, scaling_factor=opt.scaling_factor)
 
     snn.update_threshold(threshold)
 
@@ -69,7 +68,7 @@ def app(opt):
             images = images.cuda()
             labels = labels.cuda()
 
-            outs = snn(images, num_steps=opt.num_steps)
+            outs = snn(images, num_steps=opt.running_num_steps)
 
             print(labels[0])
             print(outs[0])
@@ -81,7 +80,7 @@ def app(opt):
                 total_images, (num_corrects.float() / total_images).item())
             )
 
-    print("Final validation accuracy: {}".format((num_corrects / total_images).item()))
+    print("Final validation accuracy: {}".format((num_corrects.float() / total_images).item()))
 
 
 if __name__ == '__main__':
@@ -90,7 +89,8 @@ if __name__ == '__main__':
     parser.add_argument('--data', default='data')
     parser.add_argument('--batch_size', default=1000, type=int)
     parser.add_argument('--num_steps', default=500, type=int)
+    parser.add_argument('--running_num_steps', default=2500, type=int)
     parser.add_argument('--save', default='pretrained/vgg16_acc_9289.pt')
-    parser.add_argument('--scaling', default=1.0, type=float)  # TODO: Implement
+    parser.add_argument('--scaling_factor', default=0.9, type=float)  # TODO: Implement
 
     app(parser.parse_args())
