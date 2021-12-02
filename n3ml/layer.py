@@ -146,7 +146,110 @@ class SoftIF2d(nn.Module):
         self.v.fill_(0.0)
         self.s.fill_(0.0)
 
+class IF1d(Layer):
+    def __init__(self, neurons: int, batch_size: int, threshold: float, reset: float) -> None:
+        super(IF1d, self).__init__()
+        self.neurons = neurons
+        self.batch_size = batch_size
+        self.register_buffer('v', torch.zeros(batch_size, neurons))
+        self.register_buffer('s', torch.zeros(batch_size, neurons))
+        self.register_buffer('rst', torch.tensor(reset))
+        self.register_buffer('th', torch.tensor(threshold))
 
+    def reset_variables(self, batch_size:int):
+        self.v =torch.full(size=(batch_size, self.v.size(1)), fill_value=self.rst.item(), device=self.v.device)
+        self.s = torch.zeros(size=(batch_size, self.s.size(1)), device=self.s.device)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        self.v += x
+        self.s[:] = (self.v > self.th).float()
+        self.v.masked_fill_(self.v >= self.th.item(), self.rst.item())
+        return self.s
+        
+
+class IF2d(Layer):
+    def __init__(self, planes: int, height: int, width: int, batch_size: int, threshold: float, reset: float) -> None:
+        super(IF2d, self).__init__()
+        self.planes = planes
+        self.height = height
+        self.width = width
+        self.batch_size = batch_size
+        self.register_buffer('v', torch.zeros(batch_size, planes, height, width))
+        self.register_buffer('s', torch.zeros(batch_size, planes, height, width))
+        self.register_buffer('rst', torch.tensor(reset))
+        self.register_buffer('th', torch.tensor(threshold))
+
+    def reset_variables(self, batch_size:int):
+        self.v =torch.full(size=(batch_size, self.v.size(1),self.v.size(2),self.v.size(3)), fill_value=self.rst.item(), device=self.v.device)
+        self.s = torch.zeros(size=(batch_size, self.s.size(1),self.s.size(2),self.s.size(3)), device=self.s.device)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        self.v += x
+        self.s[:] = (self.v > self.th).float()
+        self.v.masked_fill_(self.v >= self.th.item(), self.rst.item())
+        return self.s
+    
+    
+class Cuba_LIF1d(Layer):
+
+    def __init__(self,
+                 batch_size: int,
+                 neurons: int,
+                 threshold: float,
+                 leakage: float,
+                 q:float,                  # total charge that is injected in a post-neuron via a synape strenght wij=1
+                 reset: float = 0.0) -> None:
+        super(Cuba_LIF1d, self).__init__()
+        self.register_buffer('th', torch.tensor(threshold))
+        self.register_buffer('leak', torch.tensor(leakage))
+        self.register_buffer('rst', torch.tensor(reset))
+        self.register_buffer('q', torch.tensor(q))
+        self.register_buffer('v', torch.zeros(batch_size, neurons))
+        self.register_buffer('s', torch.zeros(batch_size, neurons))
+
+
+
+    def reset_variables(self, batch_size: int) -> None:
+        self.v = torch.full(size=(batch_size, self.v.size(1)), fill_value=self.rst.item(), device=self.v.device)
+        self.s = torch.zeros(size=(batch_size, self.s.size(1)), device=self.s.device)
+
+    def forward(self, x):
+        self.v = (self.leak * self.v) + (x*self.q)
+        self.s[:] = (self.v >= self.th).float()
+        self.v.masked_fill(self.v >= self.th, self.rst.item())
+        return self.s
+    
+class Cuba_LIF2d(Layer):
+    def __init__(self,
+                 batch_size: int,
+                 planes: int,
+                 height: int,
+                 width: int,
+                 threshold: float,
+                 q: float,           # total charge that is injected in a post-neuron via a synape strenght wij=1
+                 leakage: float,
+                 reset: float = 0.0) -> None:
+        super(Cuba_LIF2d, self).__init__()
+        self.register_buffer('th', torch.tensor(threshold))
+        self.register_buffer('leak', torch.tensor(leakage))
+        self.register_buffer('rst', torch.tensor(reset))
+        self.register_buffer('v', torch.zeros(batch_size, planes, height, width))
+        self.register_buffer('s', torch.zeros(batch_size, planes, height, width))
+        self.register_buffer('q', torch.tensor(q))
+
+    def reset_variables(self, batch_size: int) -> None:
+        self.v = torch.full(size=(batch_size, self.v.size(1), self.v.size(2), self.v.size(3)),
+                            fill_value=self.rst.item(), device=self.v.device)
+        self.s = torch.zeros(size=(batch_size, self.s.size(1), self.s.size(2), self.s.size(3)),
+                             device=self.s.device)
+
+    def forward(self, x):
+        self.v = (self.leak * self.v) + (x* self.q)
+        self.s[:] = (self.v >= self.th).float()
+        self.v.masked_fill(self.v >= self.th, self.rst.item())
+        return self.s
+    
+        
 def softplus(x, sigma=1.):
     y = torch.true_divide(x, sigma)
     z = x.clone().float()
