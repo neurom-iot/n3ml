@@ -36,7 +36,7 @@ def app(opt):
         shuffle=True)
 
     ann = VGG16()
-    ann.load_state_dict(torch.load(opt.save)['model'])
+    ann.load_state_dict(torch.load(opt.pretrained)['model'])
     if torch.cuda.is_available():
         ann.cuda()
 
@@ -56,9 +56,8 @@ if __name__ == '__main__':
     parser.add_argument('--data', default='data')
     parser.add_argument('--batch_size', default=1000, type=int)
     parser.add_argument('--num_steps', default=500, type=int)
-    parser.add_argument('--running_num_steps', default=2500, type=int)
-    parser.add_argument('--pretraind', default='pretrained/vgg16_acc_9289.pt')
-    parser.add_argument('--save', default='pretrained/svgg16_ths_vgg16_acc_9289.pt')
+    parser.add_argument('--pretrained', default='pretrained/vgg16_acc_9289.pt')
+    parser.add_argument('--save', default='pretrained/svgg16_ths.pt')
     parser.add_argument('--scaling_factor', default=1.0, type=float)
 
     app(parser.parse_args())

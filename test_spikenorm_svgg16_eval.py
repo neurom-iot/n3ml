@@ -34,13 +34,13 @@ def app(opt):
 
     ann = VGG16()
     ann.load_state_dict(torch.load(opt.pretrained)['model'])
-    if torch.cuda.is_available():
-        ann.cuda()
 
     snn = SVGG16(ann, batch_size=opt.batch_size)
+    if torch.cuda.is_available():
+        ann.cuda()
     snn.eval()
-    threshold = torch.load(opt.save)
 
+    threshold = torch.load(opt.save)
     snn.update_threshold(threshold)
 
     total_images = 0

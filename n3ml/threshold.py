@@ -40,7 +40,8 @@ def spikenorm(train_loader: Any,
                                 p += 1
                 ths[l] = max(scaling_factor * ths[l], max_mem)
                 # TODO: if 문을 어떻게 조절할 수 있을까?
-                if it == 5:
+                # TODO: upper_bound(it)은 여러 요인에 따라 달라질 수 있다.
+                if it == 0:
                     break
         print("{}-th layer's threshold: {}".format(l, ths[l]))
         model.update_threshold([th for th in ths])

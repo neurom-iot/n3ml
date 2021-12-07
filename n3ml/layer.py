@@ -75,7 +75,7 @@ class SoftIF1d(nn.Module):
         super(SoftIF1d, self).__init__()
         self.batch_size = batch_size
         self.num_features = num_features
-        self.threshold = threshold
+        self.threshold = torch.tensor(threshold)
         self.v = torch.zeros(size=(batch_size, num_features),
                              device='cuda' if torch.cuda.is_available() else 'cpu')
         self.s = torch.zeros(size=(batch_size, num_features),
@@ -114,7 +114,7 @@ class SoftIF2d(nn.Module):
         self.num_channels = num_channels
         self.height = height
         self.width = width
-        self.threshold = threshold
+        self.threshold = torch.tensor(threshold)
         self.v = torch.zeros(size=(batch_size, num_channels, height, width),
                              device='cuda' if torch.cuda.is_available() else 'cpu')
         self.s = torch.zeros(size=(batch_size, num_channels, height, width),
