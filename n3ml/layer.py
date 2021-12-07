@@ -160,6 +160,10 @@ class IF1d(Layer):
         self.v =torch.full(size=(batch_size, self.v.size(1)), fill_value=self.rst.item(), device=self.v.device)
         self.s = torch.zeros(size=(batch_size, self.s.size(1)), device=self.s.device)
 
+    def init_vars(self):
+        self.v.fill_(self.rst.item())
+        self.s.fill_(0.0)
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         self.v += x
         self.s[:] = (self.v > self.th).float()
@@ -182,6 +186,11 @@ class IF2d(Layer):
     def reset_variables(self, batch_size:int):
         self.v =torch.full(size=(batch_size, self.v.size(1),self.v.size(2),self.v.size(3)), fill_value=self.rst.item(), device=self.v.device)
         self.s = torch.zeros(size=(batch_size, self.s.size(1),self.s.size(2),self.s.size(3)), device=self.s.device)
+
+    def init_vars(self):
+        self.v.fill_(self.rst.item())
+        self.s.fill_(0.0)
+
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         self.v += x
