@@ -46,3 +46,26 @@ def spikenorm(train_loader: Any,
         model.update_threshold([th for th in ths])
     print("the found thresholds: {}".format(ths))
     return ths
+  
+  
+  
+def activation_based(train_loader: Any,
+              model: network.Network):
+    """
+    - This function implements Diehl2015 algorithm that finds the proper thresholds
+    for ANN-SNN conversion.
+    - The function assumes that the input model is a trained ANN.
+    """
+    model.eval()
+    ths = []  # The number of learnable layers
+    for m in model.named_children():
+        if isinstance(m[1], nn.Conv2d) or isinstance(m[1], nn.Linear) :
+            ths.append(0.0)
+
+    for it, (images, _) in enumerate(train_loader):
+        if torch.cuda.is_available():
+            images = images.cuda()
+        with torch.no_grad():
+            model(x= images, find_threshold = True, threshold= ths)
+    return ths
+  
