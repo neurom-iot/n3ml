@@ -13,17 +13,7 @@ import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
 
-from n3ml.network import Network
-
-
-class Model(Network):
-    def __init__(self):
-        super(Model, self).__init__()
-
-    def forward(self, x):
-        for m in self.named_children():
-            x = m[1](x)
-        return x
+from n3ml.model import DynamicModel_SpikeNorm_ANN
 
 
 def build_model(model):
@@ -131,7 +121,7 @@ def app(opt):
         batch_size=opt.batch_size,
         shuffle=False)
 
-    model = Model()
+    model = DynamicModel_SpikeNorm_ANN()
     model = build_model(model)
     if torch.cuda.is_available():
         model.cuda()

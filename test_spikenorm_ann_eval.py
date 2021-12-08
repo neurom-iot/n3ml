@@ -12,17 +12,7 @@ import torch.nn as nn
 import torchvision
 import torchvision.transforms as transforms
 
-from n3ml.network import Network
-
-
-class Model(Network):
-    def __init__(self):
-        super(Model, self).__init__()
-
-    def forward(self, x):
-        for m in self.named_children():
-            x = m[1](x)
-        return x
+from n3ml.model import DynamicModel_SpikeNorm_ANN
 
 
 def validate(val_loader, model, criterion):
@@ -67,7 +57,7 @@ def app(opt):
 
     state_dict = torch.load(opt.pretrained)
 
-    model = Model()
+    model = DynamicModel_SpikeNorm_ANN()
     for m in state_dict['arch']:
         model.add_module(m[0], m[1])
 

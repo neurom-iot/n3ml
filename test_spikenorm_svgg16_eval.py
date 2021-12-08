@@ -76,4 +76,3 @@ if __name__ == '__main__':
     parser.add_argument('--save', default='pretrained/svgg16_ths_vgg16_acc_9289.pt')
 
     app(parser.parse_args())
-
