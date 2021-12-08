@@ -542,17 +542,28 @@ class SVGG16(nn.Module):
         self.fc15_if.threshold = threshold[14]
         self.fc16_if.threshold = threshold[15]
 
-    def forward(self, images: torch.Tensor,
+    def forward(self,
+                images: torch.Tensor,
                 num_steps: int,
                 find_max_inp: bool = False,
                 find_max_layer: int = 0) -> Union[torch.Tensor, float]:
+        """
+        Assume that there are two types of input images - raw images and encoded images.
+            1. images.size: [batch_size, num_channels, height, width]
+            2. images.size: [num_steps, batch_size, num_channels, height, width]
+        """
 
         self.init_neuron_models()
         max_mem = 0.0
         o = 0
 
         for step in range(num_steps):
-            x = torch.mul(torch.le(torch.rand_like(images), torch.abs(images)*1.0).float(), torch.sign(images))
+            if len(images.size()) == 4:  # raw images
+                x = torch.mul(torch.le(torch.rand_like(images), torch.abs(images)*1.0).float(), torch.sign(images))
+            elif len(images.size()) == 5:  # encoded images
+                x = images[step]
+            else:
+                raise Exception('Expected images size: 4 or 5, but got {}'.format(len(images.size())))
 
             x = self.conv1(x)
             if find_max_inp and find_max_layer == 0:
