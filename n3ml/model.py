@@ -1,12 +1,12 @@
 import math
 from collections import OrderedDict
-from typing import List, Union
+from typing import List, Union, Any
 
 import torch
 import torch.nn as nn
 import torch.distributions.uniform
 
-from n3ml.layer import IF1d, IF2d, Conv2d, AvgPool2d, Linear, Bohte, TravanaeiAndMaida
+from n3ml.layer import IF1d, IF2d, Conv2d, AvgPool2d, Linear, Bohte, TravanaeiAndMaida, Wu1d, Wu2d
 
 from n3ml.network import Network
 import n3ml.layer
@@ -40,7 +40,6 @@ class Voelker2015(n3ml.network.Network):
                                                       output_size=output_size,
                                                       neuron_type=n3ml.population.LIF))
 
-
     def init_vars(self) -> None:
         for p in self.population.values():
             p.init_vars()
@@ -48,6 +47,34 @@ class Voelker2015(n3ml.network.Network):
     def init_params(self) -> None:
         for p in self.population.values():
             p.init_params()
+
+
+class DynamicModel_STBP_SNN(nn.Module):
+    def __init__(self, batch_size: int) -> None:
+        super(DynamicModel_STBP_SNN, self).__init__()
+        self.batch_size = batch_size
+
+    def forward(self, encoder: Any, images: torch.Tensor, num_steps: int) -> torch.Tensor:
+        v = {}
+        s = {}
+        for m in self.named_children():
+            if isinstance(m[1], Wu1d):
+                v[m[0]] = torch.zeros(m[1].batch_size, m[1].neurons, device=images.device)
+                s[m[0]] = torch.zeros(m[1].batch_size, m[1].neurons, device=images.device)
+            elif isinstance(m[1], Wu2d):
+                v[m[0]] = torch.zeros(m[1].batch_size, m[1].planes, m[1].height, m[1].width, device=images.device)
+                s[m[0]] = torch.zeros(m[1].batch_size, m[1].planes, m[1].height, m[1].width, device=images.device)
+        o = []
+        for t in range(num_steps):
+            x = encoder(images)
+            for m in self.named_children():
+                if isinstance(m[1], Wu1d) or isinstance(m[1], Wu2d):
+                    x = m[1](x, v[m[0]], s[m[0]])
+                else:
+                    x = m[1](x)
+            o.append(x.clone())
+        o = torch.stack(o).sum(dim=0) / num_steps
+        return o
 
 
 class Wu2018(Network):
