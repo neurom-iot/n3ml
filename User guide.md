@@ -13,7 +13,7 @@ To train SNNs, the training algorithms can be categorized into three main approa
  biological-based learning rules, approximation of spike-based backpropagation, 
  and ANN-SNN conversion methodologies. 
  
- ###Biological-based learning approach
+### Biological-based learning approach
 Inspired by the bio-neural system, learning rules in this approach attempt to train 
  SNN by modifying the synaptic strength based on local learning rules (STDP, R-STDP) in an 
  unsupervised/semi-supervised manner.   
@@ -23,7 +23,7 @@ Pros: Biologically plausible
 
 Cos: Low accuracy compared with the remaining training appproachs.
 
-####Synaptic Time Dependent Plasticity (STDP)
+#### Synaptic Time Dependent Plasticity (STDP)
 
 ##### Description
 Spike-timing-dependent-plasticity (STDP) [] trains spiking neural networks by 
