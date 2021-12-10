@@ -126,3 +126,7 @@ To test the trained SNN with STDP, please run the following files in order :
 test/test_stdp_assign.py
 test/test_stdp_infer.py
 ```      
+### Biological-based learning approach
+Inspired by the bio-neural system, learning rules in this approach attempt to train 
+ SNN by modifying the synaptic strength based on local learning rules (STDP, R-STDP) in an 
+ unsupervised/semi-supervised manner.
