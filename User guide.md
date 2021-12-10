@@ -114,7 +114,7 @@ for epoch in range(opt.num_epochs):
 ```
 ###### Step5: Putting them together:
 
-A completed sample is now provided in test directory. 
+A completed sample is provided in the test directory. 
 
 To train SNN in [] with STDP, please run the following file:
  ```
