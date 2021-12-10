@@ -13,7 +13,7 @@ To train SNNs, the training algorithms can be categorized into three main approa
  biological-based learning rules, approximation of spike-based backpropagation, 
  and ANN-SNN conversion methodologies. 
  
-### Biological-based learning approach
+ ### Biological-based learning approach
 Inspired by the bio-neural system, learning rules in this approach attempt to train 
  SNN by modifying the synaptic strength based on local learning rules (STDP, R-STDP) in an 
  unsupervised/semi-supervised manner.   
@@ -44,80 +44,89 @@ model the history trace of postsynaptic and presynaptic spikes respectively.
 
 ##### Implementation
 
-To train spiking neuron network with STDP algorithm in n3ml:
+To train the spiking neuron network in [] with STDP algorithm on MNIST task:
 
-  1. Define necessary library
-     
-     
+###### Step1: Prepare dataset:
+Using Pytorch wrapping to load MNIST dataset.
 
-      
+```
+import torchvision
+from torchvision.transforms import transforms
 
+train_loader = torch.utils.data.DataLoader(
+    torchvision.datasets.MNIST(
+        opt.data,
+        train=True,
+        transform=torchvision.transforms.Compose([
+            transforms.ToTensor(), transforms.Lambda(lambda x: x * 32 * 4)])),
+    batch_size=opt.batch_size,
+    shuffle=True)
+```
+ ###### Step2: Define encoding method:
+Encoding is the first step in the whole SNN training process. It's responsible for 
+converting input pixel intensity into a binary sequence of spike events before feeding 
+into SNN. Specifically, here input intensities are converted into Poisson spike trains 
+whose average firing rate is proportional to the pixel intensity ( the higher the pixel 
+intensity, the higher the spike count).
    
-  
- 
-N3ML is implemented by wrapping some features in PyTorch[7]. N3ML wraps `torch.nn.Module` class to track the structure of the built neural network easily and provide the compatiability with operators in PyTorch. We can construct a spiking neural network consisting of both the operators provided in N3ML and the ones in PyTorch. We can track the architecture of a spiking neural network using the methods provided by `torch.nn.Module` class. It is helpful to transform a spiking neura network to other simulators/frameworks or neuromorphic hardwares.
-
-N3ML uses `torch.autograd.Function` to implemet surrogate derviative-based learning algorithms.
-
-N3ML wraps `torch.Tensor` to get GPU accelerations.
-
-### Constructing spiking neural networks
-
-### Simulating spiking neural networks
-
-### Transforming spiking neural networks
-
-### Visualizing spiking neural networks
-
-## Supporting learning algorithms
-n3ml provides some learning algorithms as examples that can be simulated. If you want to simulate them, you can go to test directory.
-Now, n3ml supports the following learning algorithms
-1. SpikeProp [1]
-2. STDP [2]
-3. Soft LIF [3]
-4. BP-STDP [4]
-5. STBP [5]
-
-## Installation
-Now, n3ml is tested in Python 3.7.7.
-
-### Install dependencies
-If you are installing from pip, some dependencies will be installed automatially that are registered in setup.py. Also, others can be found in requirements.txt.
 ```
-python -r requirements.txt
-```
-You can install n3ml using pip.
-```
-pip install n3ml-python
+from n3ml.encoder import PoissonEncoder
+# Define an encoder to generate spike train for an image
+encoder = PoissonEncoder(opt.time_interval)
 ```
 
-## GPU acceleration
-We follows BindsNET[6] to supprot GPU acceleration in N3ML. Bascially, N3ML is implemented by wrapping torch.Tensor similar to BindsNET.
+###### Step3: Define SNN model:
 
-## How to Contribute?
-- Feel free to create issues/pull-requests if you have any issues.
-- Please read [CONTRIBUTING.md](CONTRIBUTING.md) if you are interested in contributing the project.
-
-## PyPI
-```
-python setup.py bdist_wheel
-```
+In n3ml, the SNN model in [] is available for used. Here we define the model as follows 
 
 ```
-python -m twine upload dist/*
+from n3ml.model import DiehlAndCook2015
+# Define a model
+model = DiehlAndCook2015(neurons=100)
 ```
 
-## Contributors
+###### Step4: Training the defined model with STDP algorithm:
 
-## References
-[1] Bohte, S. M., J. N. Kok, and H. L. Poutre, Error-backpropagation in temporally encoded networks of spiking neurons. Neurocomputing, 48(1-4), 17-37 (2002)
+```
+for epoch in range(opt.num_epochs):
+    start = time.time()
+    for step, (images, labels) in enumerate(train_loader):
+        # Initialize a model
+        model.init_param()
 
-[2] Diehl, P. U. and M. Cook, Unsupervised learning of digit recognition using spike-timing-dependent plasticity, Frontiers in computational neuroscience, 9, 99 (2015)
+        # Encode images into spiked_images 
+        images = images.view(1, 28, 28)
+        spiked_images = encoder(images)
+        spiked_images = spiked_images.view(opt.time_interval, -1)
+        # spiked_images = spiked_images.cuda()
 
-[3] Hunsberger, E. and C. Eliasmith, Spiking Deep Networks with LIF Neurons, arXiv preprint arXiv:1510.08829 (2015)
+        # Train a model
+        for t in range(opt.time_interval):
+            
+            # feed forward to SNN
+            model.run({'inp': spiked_images[t]})
 
-[4] Tavanaei, A. and A. Maida, BP-STDP: Approximating backpropagation using spike timing dependent plasticity, Neurocomputing, 330, 39-47 (2019)
+            # Update weights using STDP learning rule
+            model.update()
 
-[5] Wu, Y., L. Deng, G. Li, J. Zhu, and L. Shi, Spatio-Temporal Backpropagation for Training High-Performance Spiking Neural Networks, Frontiers in neuroscience, 12, 331 (2018)
+        # Normalize weights
+        model.normalize()
+        
+        #Observe how the weights are changing during training process
+        w = model.xe.w.detach().cpu().numpy()
+        fig, mat = plot(fig, mat, w)       
+```
+###### Step5: Putting them together:
 
-[6] Hazan, H., D. J. Saunders, H. Khan, D. Patel, D. T. Sanghavi, H. T. Siegelmann, and R. Kozma, BindsNET: A Machine Learning-Oriented Spiking Neural Networks Library in Python, Frontiers in neuroinformatics, 12, 89 (2018)
+A completed sample is now provided in test directory. 
+
+To train SNN in [] with STDP, please run the following file:
+ ```
+test/test_stdp.py
+```
+
+To test the trained SNN with STDP, please run the following files in order :
+ ```
+test/test_stdp_assign.py
+test/test_stdp_infer.py
+```      
