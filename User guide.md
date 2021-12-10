@@ -44,7 +44,7 @@ model the history trace of postsynaptic and presynaptic spikes respectively.
 
 ##### Implementation
 
-
+1. Define 
 
       
 
