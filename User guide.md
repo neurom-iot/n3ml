@@ -1,8 +1,7 @@
 # User Manual 
 
 This manual aims to provide primary steps to construct and train the spiking neural networks 
-with different training algorithms. First we list training  
-approaches for SNN. Next, for each training algorithm belong to the corresponding approach, we
+with different training algorithms. First we list training approaches for SNN. Next, for each training algorithm belong to the corresponding approach, we
 will provide a detail description and an implementation procedure to train SNNs with n3ml 
 package. 
 
