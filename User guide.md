@@ -1,6 +1,6 @@
 # User Manual 
 
-This manual aims to provide primary steps to construct and train the spiking neural networks with different training algorithms. First, we list training approaches for SNN. Next, for each training algorithm belonging to the corresponding approach, we will provide a detailed description and a procedure to train SNNs with the n3ml package
+This manual aims to provide primary steps to construct and train the spiking neural networks with different training algorithms. First, we list training approaches for SNN. Next, for each training algorithm belonging to the corresponding approach, we will provide a detailed description and a procedure to train SNNs by using the n3ml package
 
 
 
@@ -19,7 +19,7 @@ Pros: Biologically plausible
 
 Cos: Low accuracy compared with the remaining training appproachs.
 
-#### Synaptic Time Dependent Plasticity (STDP)
+#### Synaptic Time Dependent Plasticity (STDP) learning rule
 
 ##### Description
 Spike-timing-dependent-plasticity (STDP) [] trains spiking neural networks by 
@@ -38,7 +38,7 @@ determine the dependence of the update on the previous weight.
 and <a href="https://www.codecogs.com/eqnedit.php?latex=x_{pre}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?x_{pre}" title="x_{pre}" /></a>
 model the history trace of postsynaptic and presynaptic spikes respectively.     
 
-##### Implementation
+##### Implementation with n3ml
 
 To train the spiking neuron network in [] with STDP algorithm on MNIST task:
 
