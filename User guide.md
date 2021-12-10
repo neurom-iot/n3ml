@@ -17,7 +17,7 @@ To train SNNs, the training algorithms can be categorized into three main approa
 Inspired by the bio-neural system, learning rules in this approach attempt to train 
  SNN by modifying the synaptic strength based on local learning rules (STDP, R-STDP) in an 
  unsupervised/semi-supervised manner.   
-####Objective
+#### Objective
 
 Pros: Biologically plausible
 
@@ -44,7 +44,11 @@ model the history trace of postsynaptic and presynaptic spikes respectively.
 
 ##### Implementation
 
-1. Define 
+To train spiking neuron network with STDP algorithm in n3ml:
+
+     1. Define necessary library
+     
+     
 
       
 
