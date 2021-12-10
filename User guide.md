@@ -46,7 +46,7 @@ model the history trace of postsynaptic and presynaptic spikes respectively.
 
 To train spiking neuron network with STDP algorithm in n3ml:
 
-     1. Define necessary library
+  1. Define necessary library
      
      
 
