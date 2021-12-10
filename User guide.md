@@ -22,7 +22,7 @@ Cos: Low accuracy compared with the remaining training appproachs.
 #### Synaptic Time Dependent Plasticity (STDP) learning rule
 
 ##### Description
-Spike-timing-dependent-plasticity (STDP) [] trains spiking neural networks by 
+Spike-timing-dependent-plasticity (STDP) [1] trains spiking neural networks by 
 adjusting the connection weight between every particular pair of pre and 
 postsynaptic neurons based on the relative timing of output and input spikes.
 The update rule is fomulated as follows
@@ -40,7 +40,7 @@ model the history trace of postsynaptic and presynaptic spikes respectively.
 
 ##### Implementation with n3ml
 
-To train the spiking neuron network in [] with STDP algorithm on MNIST task:
+To train the spiking neuron network in [1] with STDP algorithm on MNIST task:
 
 ###### Step1: Prepare dataset:
 Using Pytorch wrapping to load MNIST dataset.
@@ -73,7 +73,7 @@ encoder = PoissonEncoder(opt.time_interval)
 
 ###### Step3: Define SNN model:
 
-In n3ml, the SNN model in [] is available for used. Here we define the model as follows 
+In n3ml, the SNN model in [] is available for use. Here we define the model as follows 
 
 ```
 from n3ml.model import DiehlAndCook2015
