@@ -343,27 +343,27 @@ Using Pytorch wrapping to load MNIST dataset.
 import torchvision
 from torchvision.transforms import transforms
 
-     train_loader = torch.utils.data.DataLoader(
-        torchvision.datasets.CIFAR10(
-            data,
-            train=True,
-            transform=torchvision.transforms.Compose([
-                transforms.RandomCrop(32, padding=4),
-                transforms.RandomHorizontalFlip(),
-                transforms.ToTensor(),
-                transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))])),
-        batch_size=opt.batch_size,
-        shuffle=True)
+train_loader = torch.utils.data.DataLoader(
+   torchvision.datasets.CIFAR10(
+       data,
+       train=True,
+       transform=torchvision.transforms.Compose([
+           transforms.RandomCrop(32, padding=4),
+           transforms.RandomHorizontalFlip(),
+           transforms.ToTensor(),
+           transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))])),
+   batch_size=opt.batch_size,
+   shuffle=True)
 
-    val_loader = torch.utils.data.DataLoader(
-        torchvision.datasets.CIFAR10(
-            data,
-            train=False,
-            transform=torchvision.transforms.Compose([
-                transforms.ToTensor(),
-                transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))])),
-        batch_size=opt.batch_size,
-        shuffle=False)
+val_loader = torch.utils.data.DataLoader(
+   torchvision.datasets.CIFAR10(
+       data,
+       train=False,
+       transform=torchvision.transforms.Compose([
+           transforms.ToTensor(),
+           transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))])),
+   batch_size=opt.batch_size,
+   shuffle=False)
 ```
 
 ###### Step2: Define ANN model and training configuration
@@ -506,7 +506,7 @@ A completed sample is provided in the test directory.
 
 To train a ANN in [3], please run the following file:
  ```
-test_spikenorm_train.py
+test/test_spikenorm_train.py
 ```
 
 To train and test the corresponding SNN, please run the following file:
@@ -535,20 +535,73 @@ The network architecture in [4] is shown as follows
 
 The spike-prob algorithm can be summarized as follows
 
- ```
-SpikeProb algorithm:
+<p align="center">
+  <img src="n3ml/test/spikeprob_alg.png" width="350" title="hover text">
+</p>
 
-
-```    
 
 
 ##### Implementation with n3ml
 
-To train the spiking neuron network in [2] with on MNIST task:
+To train the spiking neuron network in [4] with on IRIS data task:
 
+###### Step1: Prepare dataset:
+Load IRIS data and convert to input spikes.
 
+```
+import n3ml.data
+import n3ml.encoder
 
+data_loader = n3ml.data.IRISDataLoader(ratio=0.8)
+data = data_loader.run()
+summary = data_loader.summarize()
 
+data_encoder = n3ml.encoder.Population(neurons=12,
+                                       minimum=summary['min'],
+                                       maximum=summary['max'],
+                                       max_firing_time=opt.max_firing_time,
+                                       not_to_fire=opt.not_to_fire,
+                                       dt=opt.dt)
+
+```
+
+###### Step2: Encode Label
+Load IRIS data and convert to input spikes.
+
+```
+class LabelEncoder:
+    def __init__(self, num_classes):
+        self.num_classes = num_classes
+
+    def run(self, label):
+        o = torch.zeros(self.num_classes)
+        o.fill_(13)  # 15 13
+        o[label].fill_(8)  # 5 7
+        return o
+
+label_encoder = LabelEncoder(opt.num_classes)
+
+```
+
+###### Step3: Define model and train with Spikeprob algorithm
+The SNN in [4] is available for usein n3ml. Here we initialize the model and train the SNN as follows
+
+```
+import n3ml.model
+import n3ml.optimizer
+
+model = n3ml.model.Bohte2002()
+model.initialize()
+optimizer = n3ml.optimizer.Bohte()
+```
+###### Step4: Putting them together:
+
+A completed sample is provided in the test directory. 
+
+To train a SNN in [4] with the Spikeprob algorithm, please run the following file
+ ```
+test/test_spikeprop.py
+```
 
 
 
