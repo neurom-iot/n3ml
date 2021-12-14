@@ -9,7 +9,7 @@ To train SNNs, the training algorithms can be categorized into three main approa
  biological-based learning rules, approximation of spike-based backpropagation, 
  and ANN-SNN conversion methodologies. 
  
- ## Biological-based learning approach
+## Biological-based learning approach
 Inspired by the bio-neural system, learning rules in this approach attempt to train 
  SNN by modifying the synaptic strength based on local learning rules (STDP, R-STDP) in an 
  unsupervised/semi-supervised manner.   
@@ -515,8 +515,24 @@ test/test_spikenorm_infer.py
 
 ```    
 
+## Direct training approach
+Inspired by the most popular backpropagation algorithm in the traditional ANN, learning algorithms in this approach train SNNs directly by approximating the error backpropagation of spiking neurons. As the result, this approach has shown a better training accuracy than the biological-based training approach but it requires a very high computational cost and is not biologically plausible 
+#### Objective
+
+Pros: competitive accuracy compared with ANN
+
+Cons: High computational cost, not biological plausible.
+
+#### Spike-prob algorithm (Bohte, S. M., J. N. Kok, and H. L. Poutre, Error-backpropagation in temporally encoded networks of spiking neurons. Neurocomputing, 48(1-4), 17-37 (2002))  
+
+##### Description
+This algorithm is based on an error-backpropagation learning rule suited for supervised learning of spiking neurons that use exact spike time coding. It demonstrates the spiking neurons that can perform complex nonlinear classification in fast temporal coding. The spike-prob algorithm can be summarized as follows
 
 
+
+##### Implementation with n3ml
+
+To train the spiking neuron network in [2] with on MNIST task:
 
 
 
