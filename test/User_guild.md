@@ -647,7 +647,7 @@ from torchvision.transforms import transforms
         shuffle=False)
 ```
 
-###### Step2: Define model, encoding method , BPSTDP optimization method and loss
+###### Step2: Define model, encoding method , BP-STDP optimization method and loss
 
 SNN model, encoding method, and optimization method all are available in n3ml for use.  
 
@@ -694,8 +694,8 @@ def mse(r: torch.Tensor,
 
 ```
 
-###### Step3: Train and evaluate model with bpstdp algorithm
-The SNN in [4] is available for usein n3ml. Here we initialize the model and train the SNN as follows
+###### Step3: Train and evaluate model with BP_STDP algorithm
+The SNN in [5] is available for usein n3ml. Here we initialize the model and train the SNN as follows
 
 ```
 for epoch in range(opt.num_epochs):
@@ -844,11 +844,11 @@ test/test_bpstdp.py
 #### STBP algorithm (Wu, Yujie, et al. "Spatio-temporal backpropagation for training high-performance spiking neural networks." Frontiers in neuroscience 12 (2018): 331.)  
 
 ##### Description
-Inspired by the backpropagation algorithm, STBP (Spatio-temporal backpropagation) algorithm combines the layer-by-layer spatial domain (SD) and the timing-dependent temporal domain (TD), and does not require any additional complicated skill. 
+Inspired by the backpropagation algorithm, STBP (Spatio-temporal backpropagation) algorithm in [6] combines the layer-by-layer spatial domain (SD) and the timing-dependent temporal domain (TD), and does not require any additional complicated skill. 
 
 ##### Implementation with n3ml
 
-To train the spiking neuron network in [5] with the BP-STDP on MNIST data task:
+To train the spiking neuron network in [6] with the STBP on MNIST data task:
 
 ###### Step1: Prepare dataset:
 Using Pytorch wrapping to load MNIST dataset.
@@ -1014,7 +1014,7 @@ def train(train_loader, model, criterion, optimizer):
 
 A completed sample is provided in the test directory. 
 
-To train a SNN in [6] with the STDBP algorithm, please run the following file
+To train a SNN in [6] with the STBP algorithm, please run the following file
  
  ```
 test/test_stbp.py
