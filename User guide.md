@@ -603,6 +603,77 @@ To train a SNN in [4] with the Spikeprob algorithm, please run the following fil
 test/test_spikeprop.py
 ```
 
+#### BP-STDP algorithm (Tavanaei, Amirhossein, and Anthony Maida. "BP-STDP: Approximating backpropagation using spike timing dependent plasticity." Neurocomputing 330 (2019): 39-47.)  
+
+##### Description
+Although gradient descent has shown impressive performance in multi-layer SNNs, it is generally not considered biologically plausible and is also computationally expensive. This algorithm is inspired by the spike-timing-dependent plasticity (STDP) rule embedded in a network of integrate-and-fire (IF) neurons. Specifically, the weight update rule follows the backpropagation at each time step. This approach enjoys benefits of both accurate gradient descent and temporally local, efficient STDP
+
+The BP-STDP algorithm is summarized as follows
+
+
+
+
+##### Implementation with n3ml
+
+To train the spiking neuron network in [4] with on IRIS data task:
+
+###### Step1: Prepare dataset:
+Load IRIS data and convert to input spikes.
+
+```
+import n3ml.data
+import n3ml.encoder
+
+data_loader = n3ml.data.IRISDataLoader(ratio=0.8)
+data = data_loader.run()
+summary = data_loader.summarize()
+
+data_encoder = n3ml.encoder.Population(neurons=12,
+                                       minimum=summary['min'],
+                                       maximum=summary['max'],
+                                       max_firing_time=opt.max_firing_time,
+                                       not_to_fire=opt.not_to_fire,
+                                       dt=opt.dt)
+
+```
+
+###### Step2: Encode Label
+Load IRIS data and convert to input spikes.
+
+```
+class LabelEncoder:
+    def __init__(self, num_classes):
+        self.num_classes = num_classes
+
+    def run(self, label):
+        o = torch.zeros(self.num_classes)
+        o.fill_(13)  # 15 13
+        o[label].fill_(8)  # 5 7
+        return o
+
+label_encoder = LabelEncoder(opt.num_classes)
+
+```
+
+###### Step3: Define model and train with Spikeprob algorithm
+The SNN in [4] is available for usein n3ml. Here we initialize the model and train the SNN as follows
+
+```
+import n3ml.model
+import n3ml.optimizer
+
+model = n3ml.model.Bohte2002()
+model.initialize()
+optimizer = n3ml.optimizer.Bohte()
+```
+###### Step4: Putting them together:
+
+A completed sample is provided in the test directory. 
+
+To train a SNN in [4] with the Spikeprob algorithm, please run the following file
+ ```
+test/test_spikeprop.py
+```
 
 
 
