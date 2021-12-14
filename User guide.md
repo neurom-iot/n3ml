@@ -594,6 +594,7 @@ model = n3ml.model.Bohte2002()
 model.initialize()
 optimizer = n3ml.optimizer.Bohte()
 ```
+
 ###### Step4: Putting them together:
 
 A completed sample is provided in the test directory. 
@@ -896,7 +897,7 @@ val_loader = torch.utils.data.DataLoader(
     shuffle=True)
 ```
 
-###### Step2: Define and training the model 
+###### Step2: Define, training and evaluate the SNN model 
 
 The SNN model in  [6] is available for use in n3ml. Here we initialize the SNN and train as follows
 
@@ -1029,4 +1030,12 @@ def train(train_loader, model, criterion, optimizer):
 
 ```
 
+###### Step3: Putting them together:
+
+A completed sample is provided in the test directory. 
+
+To train a SNN in [6] with the STDBP algorithm, please run the following file
+ ```
+test/test_stbp.py
+```
 
