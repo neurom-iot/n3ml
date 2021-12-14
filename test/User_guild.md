@@ -175,7 +175,7 @@ from torchvision.transforms import transforms
 ```
 
 ###### Step2: Define ANN model and training configuration
-The ANN model in [2] is available for use. Here we initialize the model and training method as follows  
+The ANN model in [2] is available for use. Here we initialize and training the model as follows  
 
 ```
 from n3ml.model import Diehl2015
