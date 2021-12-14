@@ -135,13 +135,13 @@ Pros: High performance, Low computational cost compared with direct training app
 
 Cons: Long latency is required, the ANN must satisfy some constraint conditions
 
-#### Diehl et al. (2015) 
+#### Diehl et al.Fast-Classifying, High-Accuracy Spiking Deep Networks Through Weight and Threshold Balancing (2015) 
 
 ##### Description
-Activation-based threshold balancing is the conversion method was first introduced in [2]. The primary principle of this method is the fring rates of spiking neurons are proportional to activations of analog neurons:
+Maximum activation-based conversion method was first introduced in [2]. The primary principle of this method is the fring rates of spiking neurons are proportional to activations of analog neurons:
 - First, a traditional artificial neural network composed of ReLU neurons is trained by using the backpropagation algorithm. 
 - The trained weights in CNN then are transferred directly to the corresponding SNN model
-- The activation-based threshold balancing technique in [2] is applied to assign fring thresholds to the IF neurons in the SNN. Note that, this assignment is performed at each layer independently based on the corresponding maximum activation.
+- The **activation-based threshold balancing technique** in [2] is applied to assign fring thresholds to the IF neurons in the SNN. Note that, this assignment is performed at each layer independently based on the corresponding maximum activation.
 - In the inference phase of SNN, each input sample is encoded into spike trains before feeding into SNN for spike count-based classification. 
 
 ##### Implementation with n3ml
@@ -262,9 +262,9 @@ The corresponding SNN model of IF neurons in [2] is also available for use. Here
 ```
 from n3ml.model import Diehl2015, SNN_Diehl2015
 snn = SNN_Diehl2015(batch_size=opt.batch_size)
-    print(snn.batch_size)
-    snn.eval()
-    snn.cuda()
+print(snn.batch_size)
+snn.eval()
+snn.cuda()
 
 ```
 
@@ -323,9 +323,197 @@ test/test_act_based_infer.py
 
 ```      
 
+#### Sengupta et al. Going Deeper in Spiking Neural Networks: VGG and Residual Architectures (2019) 
+
+##### Description
+A conversion method with the proposed threshold balancing technique (Spike-norm) is introduced in [3]. 
+- First, a traditional artificial neural network composed of ReLU neurons is trained by using the backpropagation algorithm. 
+- The trained weights in CNN then are transferred directly to the corresponding SNN model
+- The **spike-norm technique** in [3] is applied to assign fring thresholds to the IF neurons in the SNN. Note that, this assignment is performed at each layer independently based on the maximum summation of weighted input from the Poisson input.
+- In the inference phase of SNN, each input sample is encoded into spike trains before feeding into SNN for spike count-based classification. 
+
+##### Implementation with n3ml
+
+To train the spiking neuron network in [2] with on CIFAR10 task:
+
+###### Step1: Prepare dataset:
+Using Pytorch wrapping to load MNIST dataset.
+
+```
+import torchvision
+from torchvision.transforms import transforms
+
+     train_loader = torch.utils.data.DataLoader(
+        torchvision.datasets.CIFAR10(
+            data,
+            train=True,
+            transform=torchvision.transforms.Compose([
+                transforms.RandomCrop(32, padding=4),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))])),
+        batch_size=opt.batch_size,
+        shuffle=True)
+
+    val_loader = torch.utils.data.DataLoader(
+        torchvision.datasets.CIFAR10(
+            data,
+            train=False,
+            transform=torchvision.transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))])),
+        batch_size=opt.batch_size,
+        shuffle=False)
+```
+
+###### Step2: Define ANN model and training configuration
+The VGG16 model is used in [3] is available for use. Here we initialize the model and a training method as follows  
+
+```
+from n3ml.model import VGG16
+
+model = VGG16()
+if torch.cuda.is_available():
+model.cuda()
+criterion = nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+
+best_acc = 0
+
+for epoch in range(num_epochs):
+    print("epoch: {}".format(epoch))
+    train(train_loader, model, criterion, optimizer)
+
+    loss, acc = validate(val_loader, model, criterion)
+    print("In test, loss: {} - acc: {}".format(loss, acc))
+
+    if acc > best_acc:
+        best_epoch = epoch
+        best_acc = acc
+        state_dict = {
+            'epoch': epoch,
+            'best_acc': best_acc,
+            'model': model.state_dict(),
+        }
+        torch.save(state_dict, opt.save)
+
+def train(train_loader, model, criterion, optimizer):
+    model.train()
+
+    total_images = 0
+    num_corrects = 0
+    total_loss = 0
+
+    for step, (images, labels) in enumerate(train_loader):
+        if torch.cuda.is_available():
+            images = images.cuda()
+            labels = labels.cuda()
+
+        outputs = model(images)
+
+        loss = criterion(outputs, labels)
+
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        num_corrects += float(torch.argmax(outputs, dim=1).eq(labels).sum())
+        total_loss += float(loss)
+        total_images += images.size(0)
+
+def validate(val_loader, model, criterion):
+    model.eval()
+
+    total_images = 0
+    num_corrects = 0
+    total_loss = 0
+
+    with torch.no_grad():
+        for step, (images, labels) in enumerate(val_loader):
+            if torch.cuda.is_available():
+                images = images.cuda()
+                labels = labels.cuda()
+
+            outputs = model(images)
+
+            loss = criterion(outputs, labels)
+
+            num_corrects += float(torch.argmax(outputs, dim=1).eq(labels).sum())
+            total_loss += float(loss)
+            total_images += images.size(0)
+
+    val_loss = total_loss / total_images
+    val_acc = num_corrects / total_images
+  
+```
+
+###### Step2: Define the corresponding SNN model:
+The corresponding SNN model of IF neurons is also available for use. Here we initialize the SNN model as follows  
+
+```
+from n3ml.model import VGG16, SVGG16
+snn = SVGG16(ann, batch_size=opt.batch_size)
+snn.eval()
+
+```
+
+###### Step3: Transfer directly the trained weights from the trained ANN to SNN:
+
+```
+saved_state_dict = torch.load(opt.save)
+print(saved_state_dict['epoch'])
+print(saved_state_dict['best_acc'])
+for index, m in enumerate (saved_state_dict['model']):
+    snn.state_dict()[m].copy_(saved_state_dict['model'][m])
+
+```
+
+###### Step4: Assign the firing threshold at each SNN layer:
+
+The threshold balancing technique in [3] is available in n3ml package. 
+
+```
+from n3ml.threshold import spikenorm
+threshold = spikenorm(train_loader=train_loader,
+                encoder=lambda x: torch.mul(torch.le(torch.rand_like(x), torch.abs(x)*1.0).float(),
+                                            torch.sign(x)),
+                model=snn, num_steps=opt.num_steps, scaling_factor=opt.scaling_factor)
+
+snn.update_threshold(threshold)
+```
 
 
+###### Step5: Inference in SNN:
 
+```
+with torch.no_grad():
+    for images, labels in val_loader:
+        images = images.cuda()
+        labels = labels.cuda()
+
+        outs = snn(images, num_steps=n_timesteps)
+        num_corrects += torch.argmax(outs, dim=1).eq(labels).sum(dim=0)
+        total_images += images.size(0)
+
+        print("Total images: {} - val. accuracy: {}".format(
+            total_images, (num_corrects.float() / total_images).item())
+        )
+```
+
+###### Step6: Putting them together:
+
+A completed sample is provided in the test directory. 
+
+To train a ANN in [3], please run the following file:
+ ```
+test_spikenorm_train.py
+```
+
+To train and test the corresponding SNN, please run the following file:
+ ```
+test/test_spikenorm_infer.py
+
+```    
 
 
 
