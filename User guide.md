@@ -530,7 +530,7 @@ This algorithm is based on an error-backpropagation learning rule suited for sup
 
 
 <p align="center">
-  <img src="nguhcv/n3ml/test/spikeprob_arc.png" width="350" title="hover text">
+  <img src="n3ml/test/spikeprob_arc.png" width="350" title="hover text">
 </p>
 
 The spike-prob algorithm can be summarized as follows
