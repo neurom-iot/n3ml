@@ -839,7 +839,7 @@ A completed sample is provided in the test directory.
 To train a SNN in [5] with the BP-STDP algorithm, please run the following file
  ```
 test/test_bpstdp.py
-
+ ```
 
 #### STBP algorithm (Wu, Yujie, et al. "Spatio-temporal backpropagation for training high-performance spiking neural networks." Frontiers in neuroscience 12 (2018): 331.)  
 
