@@ -530,13 +530,13 @@ The Spike-prob algorithm [4] is based on an error-backpropagation learning rule 
 
 The network architecture in [4] is shown as follows
 <p align="center">
-  <img src="n3ml/test/spikeprob_arc.png" width="350" title="hover text">
+  <img src="/test/spikeprob_arc.png" width="350" title="hover text">
 </p>
 
 The spike-prob algorithm can be summarized as follows
 
 <p align="center">
-  <img src="n3ml/test/spikeprob_alg.png" width="350" title="hover text">
+  <img src="/test/spikeprob_alg.png" width="350" title="hover text">
 </p>
 
 
