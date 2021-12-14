@@ -526,9 +526,9 @@ Cons: High computational cost, not biological plausible.
 #### Spike-prob algorithm (Bohte, S. M., J. N. Kok, and H. L. Poutre, Error-backpropagation in temporally encoded networks of spiking neurons. Neurocomputing, 48(1-4), 17-37 (2002))  
 
 ##### Description
-This algorithm is based on an error-backpropagation learning rule suited for supervised learning of spiking neurons that use exact spike time coding. It demonstrates the spiking neurons that can perform complex nonlinear classification in fast temporal coding. 
+The Spike-prob algorithm [4] is based on an error-backpropagation learning rule suited for supervised learning of spiking neurons that use exact spike time coding. It demonstrates the spiking neurons that can perform complex nonlinear classification in fast temporal coding. 
 
-
+The network architecture in [4] is shown as follows
 <p align="center">
   <img src="n3ml/test/spikeprob_arc.png" width="350" title="hover text">
 </p>
