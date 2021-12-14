@@ -612,7 +612,7 @@ Although gradient descent has shown impressive performance in multi-layer SNNs, 
 The BP-STDP algorithm is summarized as follows
 
 <p align="center">
-  <img src="n3ml/test/bpstdp_alg.png" width="350" title="hover text">
+  <img src="/test/bpstdp_alg.png" width="350" title="hover text">
 </p>
 
 
