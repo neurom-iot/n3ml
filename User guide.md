@@ -606,7 +606,7 @@ test/test_spikeprop.py
 #### BP-STDP algorithm (Tavanaei, Amirhossein, and Anthony Maida. "BP-STDP: Approximating backpropagation using spike timing dependent plasticity." Neurocomputing 330 (2019): 39-47.)  
 
 ##### Description
-Although gradient descent has shown impressive performance in multi-layer SNNs, it is generally not considered biologically plausible and is also computationally expensive. This algorithm is inspired by the spike-timing-dependent plasticity (STDP) rule embedded in a network of integrate-and-fire (IF) neurons. Specifically, the weight update rule follows the backpropagation at each time step. This approach enjoys benefits of both accurate gradient descent and temporally local, efficient STDP
+Although gradient descent has shown impressive performance in multi-layer SNNs, it is generally not considered biologically plausible and is also computationally expensive. This algorithm [5] is inspired by the spike-timing-dependent plasticity (STDP) rule embedded in a network of integrate-and-fire (IF) neurons. Specifically, the weight update rule follows the backpropagation at each time step. This approach enjoys benefits of both accurate gradient descent and temporally local, efficient STDP
 
 The BP-STDP algorithm is summarized as follows
 
@@ -618,7 +618,7 @@ The BP-STDP algorithm is summarized as follows
 
 ##### Implementation with n3ml
 
-To train the spiking neuron network in [4] with the BP-STDP on MNIST data task:
+To train the spiking neuron network in [5] with the BP-STDP on MNIST data task:
 
 ###### Step1: Prepare dataset:
 Using Pytorch wrapping to load MNIST dataset.
@@ -847,7 +847,186 @@ def accuracy(r: torch.Tensor, label: int) -> torch.Tensor:
     return (torch.argmax(torch.sum(r, dim=0)) == label).float()
 ```
 
+###### Step4: Putting them together
+A completed sample is provided in the test directory. 
+
+To train a SNN in [5] with the BP-STDP algorithm, please run the following file
+ ```
+test/test_bpstdp.py
 
 
+#### STBP algorithm (Wu, Yujie, et al. "Spatio-temporal backpropagation for training high-performance spiking neural networks." Frontiers in neuroscience 12 (2018): 331.)  
+
+##### Description
+Inspired by the backpropagation algorithm, STBP (Spatio-temporal backpropagation) algorithm combines the layer-by-layer spatial domain (SD) and the timing-dependent temporal domain (TD), and does not require any additional complicated skill. 
+
+##### Implementation with n3ml
+
+To train the spiking neuron network in [5] with the BP-STDP on MNIST data task:
+
+###### Step1: Prepare dataset:
+Using Pytorch wrapping to load MNIST dataset.
+
+```
+import torchvision
+from torchvision.transforms import transforms
+
+# Load MNIST / FashionMNIST dataset
+train_loader = torch.utils.data.DataLoader(
+    torchvision.datasets.MNIST(
+        opt.data,
+        train=True,
+        download = True,
+        transform=torchvision.transforms.Compose([
+            transforms.ToTensor(), transforms.Lambda(lambda x: x * 32)])),
+    drop_last = True,
+    batch_size=opt.batch_size,
+    shuffle=True)
+
+# Load MNIST/ FashionMNIST dataset
+val_loader = torch.utils.data.DataLoader(
+    torchvision.datasets.MNIST(
+        opt.data,
+        train=False,
+        download=True,
+        transform=torchvision.transforms.Compose([
+            transforms.ToTensor(), transforms.Lambda(lambda x: x * 32)])),
+    drop_last=True,
+    batch_size=opt.batch_size,
+    shuffle=True)
+```
+
+###### Step2: Define and training the model 
+
+The SNN model in  [6] is available for use in n3ml. Here we initialize the SNN and train as follows
+
+```
+import n3ml.model
+
+model = n3ml.model.Wu2018(batch_size=opt.batch_size, time_interval=opt.time_interval)
+if torch.cuda.is_available():
+    model = model.cuda()
+
+criterion = nn.MSELoss()
+optimizer = torch.optim.Adam(model.parameters(), lr = opt.lr)
+lr_scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[30, 60, 90])
+
+for epoch in range(opt.num_epochs):
+    start = time.time()
+    train_acc, train_loss = train(train_loader, model, criterion, optimizer)
+    end = time.time()
+    print('total time: {:.2f}s - epoch: {} - accuracy: {} - loss: {}'.format(end-start, epoch, train_acc, train_loss))
+
+    val_acc, val_loss = validate(val_loader, model, criterion)
+
+    if val_acc > best_acc:
+        best_acc = val_acc
+        state = {
+            'epoch': epoch,
+            'model': model.state_dict(),
+            'best_acc': best_acc,
+            'optimizer': optimizer.state_dict()}
+
+        print('in test, epoch: {} - best accuracy: {} - loss: {}'.format(epoch, best_acc, val_loss))
+
+    lr_scheduler.step()
+
+class Plot:
+    def __init__(self):
+        plt.ion()
+        self.fig, self.ax = plt.subplots(figsize=(10, 10))
+        self.ax2 = self.ax.twinx()
+        plt.title('STBP')
+
+    def update(self, y1, y2):
+        x = torch.arange(y1.shape[0]) * 64
+
+        ax1 = self.ax
+        ax2 = self.ax2
+
+        ax1.plot(x, y1, 'g')
+        ax2.plot(x, y2, 'b')
+
+        ax1.set_xlabel('number of images')
+        ax1.set_ylabel('accuracy', color='g')
+        ax2.set_ylabel('loss', color='b')
+
+        self.fig.canvas.draw()
+        self.fig.canvas.flush_events()
+
+
+def validate(val_loader, model, criterion):
+
+    total_images = 0
+    num_corrects = 0
+    total_loss = 0
+
+    for step, (images, labels) in enumerate(val_loader):
+        # images = images.cuda()
+        # labels = labels.cuda()
+
+        preds = model(images)
+        labels_ = torch.zeros(torch.numel(labels), 10, device=labels.device)
+        labels_ = labels_.scatter_(1, labels.view(-1, 1), 1)
+
+        loss = criterion(preds, labels_)
+
+        num_corrects += torch.argmax(preds, dim=1).eq(labels).sum(dim=0)
+        total_loss += loss.cpu().detach().numpy() * images.size(0)
+        total_images += images.size(0)
+
+    val_acc = num_corrects.float() / total_images
+    val_loss = total_loss / total_images
+
+    return val_acc, val_loss
+
+
+def train(train_loader, model, criterion, optimizer):
+    plotter = Plot()
+
+    total_images = 0
+    num_corrects = 0
+    total_loss = 0
+
+    list_loss = []
+    list_acc = []
+
+    for step, (images, labels) in enumerate(train_loader):
+        # images = images.cuda()
+        # labels = labels.cuda()
+
+        preds = model(images)
+
+        labels_ = torch.zeros(torch.numel(labels), 10, device=labels.device)
+        labels_ = labels_.scatter_(1, labels.view(-1, 1), 1)
+
+        # print("label: {} - prediction: {}".format(labels.detach().cpu().numpy()[0], preds.detach().cpu().numpy()[0]))
+
+        o = preds.detach().cpu().numpy()[0]     
+
+        print("label: {} - output neuron's voltages: {}".format(labels.detach().cpu().numpy()[0], o))
+
+        loss = criterion(preds, labels_)
+
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        num_corrects += torch.argmax(preds, dim=1).eq(labels).sum(dim=0)
+        total_loss   += loss.cpu().detach().numpy() * images.size(0)
+        total_images += images.size(0)
+
+        if total_images > 0:  #  and total_images % 30 == 0
+            list_loss.append(total_loss / total_images)
+            list_acc.append(float(num_corrects) / total_images)
+            plotter.update(y1=np.array(list_acc), y2=np.array(list_loss))
+
+
+    train_acc = num_corrects.float() / total_images
+    train_loss = total_loss / total_images
+
+    return train_acc, train_loss
+
+```
 
 
