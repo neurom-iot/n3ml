@@ -529,7 +529,9 @@ Cons: High computational cost, not biological plausible.
 This algorithm is based on an error-backpropagation learning rule suited for supervised learning of spiking neurons that use exact spike time coding. It demonstrates the spiking neurons that can perform complex nonlinear classification in fast temporal coding. 
 
 
-<img src="test/spikeprob_arc.png" alt="hi" class="inline"/>
+<p align="center">
+  <img src="nguhcv/n3ml/test/spikeprob_arc.png" width="350" title="hover text">
+</p>
 
 The spike-prob algorithm can be summarized as follows
 
