@@ -1035,6 +1035,7 @@ def train(train_loader, model, criterion, optimizer):
 A completed sample is provided in the test directory. 
 
 To train a SNN in [6] with the STDBP algorithm, please run the following file
+ 
  ```
 test/test_stbp.py
 ```
