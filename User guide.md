@@ -1039,3 +1039,18 @@ To train a SNN in [6] with the STDBP algorithm, please run the following file
 test/test_stbp.py
 ```
 
+## References
+
+[1] Diehl, P. U. and M. Cook, Unsupervised learning of digit recognition using spike-timing-dependent plasticity, Frontiers in computational neuroscience, 9, 99 (2015)
+
+[2] Diehl, Peter U., et al. "Fast-classifying, high-accuracy spiking deep networks through weight and threshold balancing." 2015 International joint conference on neural networks (IJCNN). ieee, 2015.
+
+[3] Sengupta, Abhronil, et al. "Going deeper in spiking neural networks: VGG and residual architectures." Frontiers in neuroscience 13 (2019): 95.
+
+[4] Bohte, S. M., J. N. Kok, and H. L. Poutre, Error-backpropagation in temporally encoded networks of spiking neurons. Neurocomputing, 48(1-4), 17-37 (2002)
+
+[5] Tavanaei, A. and A. Maida, BP-STDP: Approximating backpropagation using spike timing dependent plasticity, Neurocomputing, 330, 39-47 (2019)
+
+[6] Wu, Y., L. Deng, G. Li, J. Zhu, and L. Shi, Spatio-Temporal Backpropagation for Training High-Performance Spiking Neural Networks, Frontiers in neuroscience, 12, 331 (2018)
+
+
