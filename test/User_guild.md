@@ -699,10 +699,7 @@ The SNN in [4] is available for usein n3ml. Here we initialize the model and tra
 
 ```
 for epoch in range(opt.num_epochs):
-    # loss, acc = train(train_loader, model, encoder, optimizer, criterion, opt)
-    # print("epoch: {} - loss: {} - accuracy: {}".format(epoch, loss, acc))
     train(train_loader, model, encoder, optimizer, criterion, opt)
-
     loss, acc = validate(val_loader, model, encoder, criterion, opt)
     print("In test, loss: {} - accuracy: {}".format(loss, acc))
 
@@ -717,8 +714,6 @@ def train(loader, model, encoder, optimizer, criterion, opt) -> None:
     list_acc = []
 
     for image, label in loader:
-        # Squeeze batch dimension
-        # Now, batch processing isn't supported
         image = image.squeeze(dim=0)
         label = label.squeeze()
 
@@ -726,12 +721,6 @@ def train(loader, model, encoder, optimizer, criterion, opt) -> None:
         spiked_image = spiked_image.view(spiked_image.size(0), -1)
 
         spiked_label = label_encoder(label, opt.beta, opt.num_classes, opt.time_interval)
-
-        # print(label)
-        # print(spiked_label)
-        # exit(0)
-
-        # np_spiked_image = spiked_image.numpy()
 
         spike_buffer = {
             'inp': [],
@@ -745,7 +734,6 @@ def train(loader, model, encoder, optimizer, criterion, opt) -> None:
         print("label: {}".format(label))
 
         for t in range(opt.time_interval):
-            # print(np_spiked_image[t])
 
             model(spiked_image[t])
 
@@ -758,10 +746,6 @@ def train(loader, model, encoder, optimizer, criterion, opt) -> None:
             for l in spike_buffer.values():
                 if len(l) > 5:  # TODO: 5를 epsilon을 사용해서 표현해야 함
                     l.pop(0)
-
-            # print(model.fc1.u.numpy())
-            # print(model.fc1.o.numpy())
-            # print(model.fc2.u.numpy())
             print(model.fc2.o.numpy())
 
             # time.sleep(1)
@@ -848,6 +832,7 @@ def accuracy(r: torch.Tensor, label: int) -> torch.Tensor:
     return (torch.argmax(torch.sum(r, dim=0)) == label).float()
 ```
 
+
 ###### Step4: Putting them together
 A completed sample is provided in the test directory. 
 
@@ -872,7 +857,6 @@ Using Pytorch wrapping to load MNIST dataset.
 import torchvision
 from torchvision.transforms import transforms
 
-# Load MNIST / FashionMNIST dataset
 train_loader = torch.utils.data.DataLoader(
     torchvision.datasets.MNIST(
         opt.data,
@@ -884,7 +868,6 @@ train_loader = torch.utils.data.DataLoader(
     batch_size=opt.batch_size,
     shuffle=True)
 
-# Load MNIST/ FashionMNIST dataset
 val_loader = torch.utils.data.DataLoader(
     torchvision.datasets.MNIST(
         opt.data,
@@ -896,6 +879,7 @@ val_loader = torch.utils.data.DataLoader(
     batch_size=opt.batch_size,
     shuffle=True)
 ```
+
 
 ###### Step2: Define, training and evaluate the SNN model 
 
@@ -927,11 +911,8 @@ for epoch in range(opt.num_epochs):
             'model': model.state_dict(),
             'best_acc': best_acc,
             'optimizer': optimizer.state_dict()}
-
         print('in test, epoch: {} - best accuracy: {} - loss: {}'.format(epoch, best_acc, val_loss))
-
     lr_scheduler.step()
-
 class Plot:
     def __init__(self):
         plt.ion()
@@ -954,7 +935,6 @@ class Plot:
 
         self.fig.canvas.draw()
         self.fig.canvas.flush_events()
-
 
 def validate(val_loader, model, criterion):
 
@@ -980,7 +960,6 @@ def validate(val_loader, model, criterion):
     val_loss = total_loss / total_images
 
     return val_acc, val_loss
-
 
 def train(train_loader, model, criterion, optimizer):
     plotter = Plot()
@@ -1029,6 +1008,7 @@ def train(train_loader, model, criterion, optimizer):
     return train_acc, train_loss
 
 ```
+
 
 ###### Step3: Putting them together:
 
