@@ -1,5 +1,5 @@
 """
-    Bohte2002 example.
+    Bohte2002 test.
 
     Now, spikeprop algorithm can be applied to only feed-forward neural network.
     It means that when we construct neural network only consider a sequential structure.
