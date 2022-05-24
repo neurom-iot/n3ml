@@ -6,7 +6,7 @@ import torch.nn as nn
 import n3ml.network as network
 
 
-def actnorm(train_loader: Any, model: network.Network):
+def activation_based(train_loader: Any, model: network.Network):
     """
     - This function implements Diehl2015 algorithm that finds the proper thresholds
     for ANN-SNN conversion.
@@ -26,7 +26,7 @@ def actnorm(train_loader: Any, model: network.Network):
     return ths
 
 
-def actnorm(train_loader: Any, model: network.Network):
+def activation_based2(train_loader: Any, model: network.Network):
     """
     - This function implements Diehl2015 algorithm that finds the proper thresholds
     for ANN-SNN conversion.

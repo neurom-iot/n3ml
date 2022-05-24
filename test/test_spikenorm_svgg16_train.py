@@ -1,15 +1,3 @@
-"""
-It is the implementation of Spike Norm [Sengupta et al. 2018]. Spike Norm is a threshold
-balancing algorithm that finds the proper thresholds of spiking neurons in SNN for ANN-SNN
-conversion. The implementation involves four python files as follows:
-1. 'test_spikenorm_vgg16_train.py' trains a VGG-16 on CIFAR-10 and then saves a trained VGG-16.
-2. 'test_spikenorm_vgg16_eval.py' evaluates a trained VGG-16 on CIFAR-10.
-3. 'test_spikenorm_svgg16_train.py' trains a spiking VGG-16 using a trained VGG-16 on CIFAR-10
-   and then saves the thresholds that found by threshold balancing, Spike Norm algorithm.
-4. 'test_spikenorm_svgg16_eval.py' evaluates a trained spiking VGG-16 on CIFAR-10.
-
-Sengupta et al. Going deeper in spiking neural networks: VGG and residual architectures. 2018
-"""
 import argparse
 
 import torch
@@ -61,4 +49,3 @@ if __name__ == '__main__':
     parser.add_argument('--scaling_factor', default=1.0, type=float)
 
     app(parser.parse_args())
-
