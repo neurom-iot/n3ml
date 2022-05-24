@@ -1,22 +1,22 @@
 from typing import Type
 
 import torch
-import torch.nn
-import torch.distributions.distribution
+import torch.nn as nn
+import torch.distributions.distribution as distribution
 
-import n3ml.population
-import n3ml.learning
+import n3ml.population as population
+import n3ml.learning as learning
 
 
-class Synapse(torch.nn.Module):
+class Synapse(nn.Module):
     def __init__(self,
-                 source: n3ml.population.Population,
-                 target: n3ml.population.Population,
+                 source: population.Population,
+                 target: population.Population,
                  w: torch.Tensor,
                  w_min: float = 0.0,
                  w_max: float = 1.0,
                  alpha: float = None,
-                 learning_rule: Type[n3ml.learning.LearningRule] = None,
+                 learning_rule: Type[learning.LearningRule] = None,
                  initializer: torch.distributions.distribution.Distribution = None) -> None:
         super().__init__()
         self.source = source
@@ -50,13 +50,13 @@ class Synapse(torch.nn.Module):
 
 class LinearSynapse(Synapse):
     def __init__(self,
-                 source: n3ml.population.Population,
-                 target: n3ml.population.Population,
+                 source: population.Population,
+                 target: population.Population,
                  w: torch.Tensor = None,
                  w_min: float = 0.0,
                  w_max: float = 1.0,
                  alpha: float = None,
-                 learning_rule: n3ml.learning.LearningRule = None,
+                 learning_rule: learning.LearningRule = None,
                  initializer: torch.distributions.distribution.Distribution = None) -> None:
         if w is None:
             w = torch.zeros(size=(target.neurons, source.neurons))

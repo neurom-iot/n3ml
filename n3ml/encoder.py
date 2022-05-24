@@ -48,7 +48,7 @@ class Simple:
     def __call__(self, x: torch.Tensor) -> torch.Tensor:
         # x.size: [1, 28, 28]
         xx = x.unsqueeze(dim=0).repeat(self.time_interval, 1, 1, 1)
-        r = torch.rand([self.time_interval] + [_ for _ in x.size()])
+        r = torch.rand([self.time_interval] + [_ for _ in x.size()], device=x.device)
         return (xx >= self.scale * r).float()
 
 
