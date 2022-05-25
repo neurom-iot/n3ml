@@ -115,7 +115,7 @@ def train(data, model, data_encoder, label_encoder, optimizer, loss, epoch, mete
         # l = loss(o, spiked_label)
         # print("loss: {}".format(l))
 
-        optimizer.step(model, spiked_input, spiked_label, epoch)
+        optimizer.step(model, spiked_input, spiked_label)
 
         meter['num_images'] += 1
         meter['num_corrects'] += do_correct(o, spiked_label)

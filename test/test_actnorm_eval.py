@@ -84,6 +84,6 @@ if __name__ == '__main__':
 
     parser.add_argument('--data', default='data')
     parser.add_argument('--batch_size', default=500, type=int)
-    parser.add_argument('--running_num_steps', default=100, type=int)
+    parser.add_argument('--running_num_steps', default=500, type=int)
     parser.add_argument('--save', default='pretrained/diehl2015.pt')
     app(parser.parse_args())

@@ -38,17 +38,17 @@ class Plot:
         self.fig.canvas.flush_events()
 
 
-def validate(val_loader, model, criterion):
+def validate(val_loader, model, criterion, opt):
 
     total_images = 0
     num_corrects = 0
     total_loss = 0
 
     for step, (images, labels) in enumerate(val_loader):
-        # images = images.cuda()
-        # labels = labels.cuda()
+        images = images.cuda()
+        labels = labels.cuda()
 
-        preds = model(images)
+        preds = model(images, opt.time_interval)
         labels_ = torch.zeros(torch.numel(labels), 10, device=labels.device)
         labels_ = labels_.scatter_(1, labels.view(-1, 1), 1)
 
@@ -64,7 +64,7 @@ def validate(val_loader, model, criterion):
     return val_acc, val_loss
 
 
-def train(train_loader, model, criterion, optimizer):
+def train(train_loader, model, criterion, optimizer, opt):
     plotter = Plot()
 
     total_images = 0
@@ -75,10 +75,10 @@ def train(train_loader, model, criterion, optimizer):
     list_acc = []
 
     for step, (images, labels) in enumerate(train_loader):
-        # images = images.cuda()
-        # labels = labels.cuda()
+        images = images.cuda()
+        labels = labels.cuda()
 
-        preds = model(images)
+        preds = model(images, opt.time_interval)
 
         labels_ = torch.zeros(torch.numel(labels), 10, device=labels.device)
         labels_ = labels_.scatter_(1, labels.view(-1, 1), 1)
@@ -142,7 +142,7 @@ def app(opt):
         batch_size=opt.batch_size,
         shuffle=True)
 
-    model = n3ml.model.Wu2018(batch_size=opt.batch_size, time_interval=opt.time_interval)
+    model = n3ml.model.Wu2018(batch_size=opt.batch_size)
     if torch.cuda.is_available():
         model = model.cuda()
 
@@ -153,11 +153,11 @@ def app(opt):
 
     for epoch in range(opt.num_epochs):
         start = time.time()
-        train_acc, train_loss = train(train_loader, model, criterion, optimizer)
+        train_acc, train_loss = train(train_loader, model, criterion, optimizer, opt)
         end = time.time()
         print('total time: {:.2f}s - epoch: {} - accuracy: {} - loss: {}'.format(end-start, epoch, train_acc, train_loss))
 
-        val_acc, val_loss = validate(val_loader, model, criterion)
+        val_acc, val_loss = validate(val_loader, model, criterion, opt)
 
         if val_acc > best_acc:
             best_acc = val_acc

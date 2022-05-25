@@ -136,7 +136,7 @@ class Bohte:
         self.lr = lr
 
     def step(self, model, spiked_input, spiked_label):
-        lr = self.lf
+        lr = self.lr
 
         layer = []
         spike_time = [spiked_input]  # with input spike
