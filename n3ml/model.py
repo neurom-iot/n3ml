@@ -13,7 +13,7 @@ import n3ml.layer
 import n3ml.population
 import n3ml.connection
 import n3ml.learning
-from n3ml.layer import SoftLIF, LIF1d, LIF2d, SoftIF1d, SoftIF2d
+from n3ml.layer import SoftLIF, LIF1d, LIF2d, SoftIF1d, SoftIF2d, BatchIF1d, BatchIF2d
 
 
 class Diehl2015(nn.Module):
@@ -48,39 +48,37 @@ class Diehl2015(nn.Module):
 
 class SNN_IF_Diehl2015(nn.Module):
     def __init__(self, batch_size: int, threshold: List[float] = None):
-        super(SNN_IF_Diehl2015, self).__init__()
+        super(SNN_IF_Diehl2015,  self).__init__()
         self.batch_size = batch_size
         if not threshold:
             threshold = [1.0] * 3
         self.threshold = threshold
         self.conv1 = nn.Conv2d(in_channels=1, out_channels=12, kernel_size=(5, 5), stride=(1, 1), padding=0, bias=False)
-        self.conv1_if = IF2d(batch_size=self.batch_size, planes=12, height=24, width=24, threshold=threshold[0],
-                             reset=0.0)
+        self.conv1_if = BatchIF2d(batch_size=self.batch_size,planes=12,height=24,width=24,threshold=threshold[1],reset=0.0)
         self.pool1 = nn.AvgPool2d(2)
-        self.conv2 = nn.Conv2d(in_channels=12, out_channels=64, kernel_size=(5, 5), stride=(1, 1), padding=0,
-                               bias=False)
-        self.conv2_if = IF2d(batch_size=self.batch_size, planes=64, height=8, width=8, threshold=threshold[1],
-                             reset=0.0)
+        self.conv2 = nn.Conv2d(in_channels=12, out_channels=64, kernel_size=(5, 5), stride=(1, 1), padding=0,bias=False)
+        self.conv2_if = BatchIF2d(batch_size=self.batch_size,planes=64,height=8,width=8,threshold=threshold[1],reset=0.0)
         self.pool2 = nn.AvgPool2d(2)
         self.fc1 = nn.Linear(in_features=1024, out_features=10, bias=False)
-        self.fc1_if = IF1d(batch_size=self.batch_size, threshold=threshold[2], reset=0.0, neurons=10)
+        self.fc1_if = BatchIF1d(batch_size=self.batch_size,threshold=threshold[2],reset=0.0, neurons=10)
         self.flat = nn.Flatten()
-
     def update_threshold(self, threshold: List[float]) -> None:
         self.conv1_if.threshold = threshold[0]
         self.conv2_if.threshold = threshold[1]
         self.fc1_if.threshold = threshold[2]
-
     def init_neuron_models(self):
         for m in self.named_children():
-            if isinstance(m[1], IF1d) or isinstance(m[1], IF2d):
-                m[1].init_vars()
+            if isinstance(m[1], BatchIF2d):
+                m[1].voltage = torch.zeros(m[1].batch_size, m[1].planes,m[1].height,m[1].width).cuda()
+                m[1].spike = torch.zeros(m[1].batch_size, m[1].planes, m[1].height, m[1].width).cuda()
+            elif isinstance(m[1], BatchIF1d):
+                m[1].voltage = torch.zeros(m[1].batch_size, m[1].neurons).cuda()
+                m[1].spike = torch.zeros(m[1].batch_size, m[1].neurons).cuda()
+    def forward(self, images: torch.Tensor, num_steps: int,):
 
-    def forward(self, images: torch.Tensor, num_steps: int, ):
+        conv1_spikes =[]
 
-        conv1_spikes = []
-
-        o = 0
+        o=0
         print(num_steps)
         self.init_neuron_models()
         for step in range(num_steps):
