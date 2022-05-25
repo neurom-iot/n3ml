@@ -15,7 +15,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=[
         'matplotlib==3.3.1',
-        'numpy==1.19.1',
+        'numpy==1.21.0',
         'scikit-learn==0.24.1'
     ]
 )
